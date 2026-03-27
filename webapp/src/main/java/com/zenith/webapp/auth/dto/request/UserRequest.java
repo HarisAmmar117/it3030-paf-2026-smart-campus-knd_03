@@ -3,7 +3,7 @@ package com.zenith.webapp.auth.dto.request;
 import lombok.Data;
 
 @Data
-public class RegisterRequest {
+public class UserRequest {
 
 
 
