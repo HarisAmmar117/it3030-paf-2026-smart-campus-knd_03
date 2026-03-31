@@ -1,9 +1,12 @@
 package com.zenith.webapp.auth.service.impl;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 
 import com.zenith.webapp.auth.dto.request.UserRequest;
 import com.zenith.webapp.auth.dto.response.UserResponse;
+import com.zenith.webapp.auth.enums.UserRole;
 import com.zenith.webapp.auth.model.User;
 import com.zenith.webapp.auth.repository.UserRepository;
 
@@ -14,21 +17,29 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserService {
 
-
-
     private final UserRepository userRepository;
 
-    public UserResponse CreateUser(UserRequest userRequest){
+    public UserResponse createUser(UserRequest userRequest){
 
         User user = new User();
+
+     
         mapUserRequestToUser(user, userRequest);
+
+   
+        if(user.getRole() == null) {
+            user.setRole(UserRole.USER);       
+        }
+
+        if(user.getCreated_at() == null){
+            user.setCreated_at(LocalDateTime.now()); 
+        }
+
         User savedUser = userRepository.save(user);
         return mapUserToUserResponse(savedUser);
-        
     }
 
     private UserResponse mapUserToUserResponse(User user){
-
         UserResponse response = new UserResponse();
         response.setUser_id(user.getUser_id());
         response.setName(user.getName());
@@ -36,21 +47,14 @@ public class UserService {
         response.setPhone(user.getPhone());
         response.setRole(user.getRole());
         response.setCreated_at(user.getCreated_at());
-
         return response;
-
     }
 
-
     private void mapUserRequestToUser(User user, UserRequest request){
-
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
         user.setPassword(request.getPassword());
 
     }
-
- 
-    
 }

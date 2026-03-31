@@ -6,7 +6,7 @@ import com.zenith.webapp.auth.dto.request.UserRequest;
 import com.zenith.webapp.auth.dto.response.UserResponse;
 import com.zenith.webapp.auth.service.impl.UserService;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,17 +16,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
 
-    
+
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest userRequest){
 
-        UserResponse response = userService.CreateUser(userRequest);
+        UserResponse response = userService.createUser(userRequest);
 
         if(response != null){
             return ResponseEntity.ok(response);
