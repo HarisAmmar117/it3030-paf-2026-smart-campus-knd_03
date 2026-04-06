@@ -1,6 +1,7 @@
 package com.zenith.webapp.auth.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,42 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
         return mapUserToUserResponse(savedUser);
+    }
+
+    public List<UserResponse> getAllUsers(){
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapUserToUserResponse)
+                .toList();
+    }
+
+    public UserResponse getUserById(Long id){
+        return userRepository.findById(id)
+                .map(this::mapUserToUserResponse)
+                .orElse(null);
+    }
+
+    public UserResponse updateUser(Long id, UserRequest request){
+
+        return userRepository.findById(id).map(user -> {
+
+            // update fields
+            mapUserRequestToUser(user, request);
+
+            User updatedUser = userRepository.save(user);
+            return mapUserToUserResponse(updatedUser);
+
+        }).orElse(null);
+    }
+
+
+    public boolean deleteUser(Long id){
+
+        if(userRepository.existsById(id)){
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     private UserResponse mapUserToUserResponse(User user){
