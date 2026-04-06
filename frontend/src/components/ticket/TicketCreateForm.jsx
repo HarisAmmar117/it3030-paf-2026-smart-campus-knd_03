@@ -16,7 +16,7 @@ const PRIORITIES = [
   { value: "LOW", label: "Low", color: "var(--priority-low)" },
   { value: "MEDIUM", label: "Medium", color: "var(--priority-medium)" },
   { value: "HIGH", label: "High", color: "var(--priority-high)" },
-  { value: "CRITICAL", label: "Critical", color: "var(--priority-critical)" },
+  // { value: "CRITICAL", label: "Critical", color: "var(--priority-critical)" },
 ];
 
 const initialForm = {
