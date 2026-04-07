@@ -100,3 +100,111 @@ export async function deleteTicket(ticketId, userId = 101) {
     throw new Error(message);
   }
 }
+
+// ========================
+// COMMENT ENDPOINTS
+// ========================
+
+export async function getComments(ticketId) {
+  const response = await fetch(`${BASE_URL}/api/tickets/${ticketId}/comments`);
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = [];
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to fetch comments";
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function addComment(ticketId, content, userId = 101) {
+  const response = await fetch(
+    `${BASE_URL}/api/tickets/${ticketId}/comments`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-User-Id": String(userId),
+      },
+      body: JSON.stringify({ content }),
+    }
+  );
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to add comment";
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function updateComment(
+  ticketId,
+  commentId,
+  content,
+  userId = 101,
+  role = "USER"
+) {
+  const response = await fetch(
+    `${BASE_URL}/api/tickets/${ticketId}/comments/${commentId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "X-User-Id": String(userId),
+        "X-User-Role": role,
+      },
+      body: JSON.stringify({ content }),
+    }
+  );
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to update comment";
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function deleteComment(
+  ticketId,
+  commentId,
+  userId = 101,
+  role = "USER"
+) {
+  const response = await fetch(
+    `${BASE_URL}/api/tickets/${ticketId}/comments/${commentId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "X-User-Id": String(userId),
+        "X-User-Role": role,
+      },
+    }
+  );
+  if (!response.ok) {
+    let data = null;
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+    const message =
+      (data && (data.error || data.message)) || "Failed to delete comment";
+    throw new Error(message);
+  }
+}

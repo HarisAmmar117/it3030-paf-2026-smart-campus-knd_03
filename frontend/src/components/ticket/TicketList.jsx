@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { deleteTicket, getTickets, updateTicket } from "../../api/ticketApi";
+import CommentSection from "./CommentSection";
 import "./TicketList.css";
 
 const STATUS_OPTIONS = ["", "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED"];
@@ -23,7 +24,12 @@ export default function TicketList() {
   const [editTicketId, setEditTicketId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [openComments, setOpenComments] = useState({});
   const currentUserId = 101;
+
+  const toggleComments = (ticketId) => {
+    setOpenComments((prev) => ({ ...prev, [ticketId]: !prev[ticketId] }));
+  };
 
   const loadTickets = useCallback(async () => {
   setLoading(true);
@@ -301,6 +307,19 @@ export default function TicketList() {
                 </div>
               </form>
             ) : null}
+
+            {/* Comment toggle & section */}
+            <button
+              type="button"
+              className="comment-toggle-btn"
+              onClick={() => toggleComments(t.id)}
+            >
+              💬 {openComments[t.id] ? "Hide Comments" : "Comments"}
+            </button>
+
+            {openComments[t.id] && (
+              <CommentSection ticketId={t.id} currentUserId={currentUserId} />
+            )}
                 </>
               );
             })()}
