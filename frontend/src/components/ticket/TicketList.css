@@ -96,12 +96,96 @@
   color: var(--gray-500);
 }
 
+.ticket-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.ticket-actions .btn-secondary,
+.ticket-actions .btn-danger {
+  padding: 8px 14px;
+  font-size: 0.82rem;
+}
+
+.ticket-edit-form {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-light);
+}
+
+.ticket-edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ticket-edit-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+.ticket-edit-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.ticket-edit-form .form-group label {
+  font-size: 0.78rem;
+  margin-bottom: 4px;
+  color: var(--gray-600);
+}
+
+.ticket-edit-form input,
+.ticket-edit-form textarea,
+.ticket-edit-form select {
+  padding: 8px 10px;
+  font-size: 0.85rem;
+}
+
+.ticket-edit-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.ticket-edit-actions .btn-primary,
+.ticket-edit-actions .btn-secondary {
+  padding: 8px 14px;
+  font-size: 0.82rem;
+}
+
 .empty-state {
   text-align: center;
 }
 
+/* Comment toggle */
+.comment-toggle-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--gray-500);
+  background: var(--gray-50);
+  border: 1px dashed var(--border-light);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: none;
+}
+
+.comment-toggle-btn:hover {
+  color: var(--primary-600);
+  background: var(--primary-50);
+  border-color: var(--primary-200);
+}
+
 @media (max-width: 768px) {
   .ticket-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-edit-grid {
     grid-template-columns: 1fr;
   }
 }

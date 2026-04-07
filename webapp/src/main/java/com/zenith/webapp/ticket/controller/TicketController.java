@@ -17,6 +17,13 @@ import com.zenith.webapp.ticket.enums.TicketStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
+import com.zenith.webapp.ticket.dto.request.UpdateTicketRequest;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import com.zenith.webapp.ticket.dto.request.CreateCommentRequest;
+import com.zenith.webapp.ticket.dto.response.TicketCommentResponse;
+import com.zenith.webapp.ticket.dto.request.UpdateCommentRequest;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -42,6 +49,64 @@ public class TicketController {
         @RequestParam(required = false) TicketPriority priority
 ) {
     return ResponseEntity.ok(ticketService.getTickets(status, priority));
+}
+
+    @PatchMapping("/{ticketId}")
+    public ResponseEntity<TicketResponse> updateTicketByRequester(
+        @PathVariable Long ticketId,
+        @Valid @RequestBody UpdateTicketRequest request,
+        @RequestHeader("X-User-Id") Long requesterId
+) {
+    return ResponseEntity.ok(ticketService.updateTicketByRequester(ticketId, request, requesterId));
+}
+
+
+    @DeleteMapping("/{ticketId}")
+    public ResponseEntity<Void> deleteTicketByRequester(
+        @PathVariable Long ticketId,
+        @RequestHeader("X-User-Id") Long requesterId
+) {
+    ticketService.deleteTicketByRequester(ticketId, requesterId);
+    return ResponseEntity.noContent().build();
+}
+
+    @PostMapping("/{ticketId}/comments")
+    public ResponseEntity<TicketCommentResponse> addComment(
+        @PathVariable Long ticketId,
+        @Valid @RequestBody CreateCommentRequest request,
+        @RequestHeader("X-User-Id") Long actorUserId
+) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ticketService.addComment(ticketId, request, actorUserId));
+}
+
+    @GetMapping("/{ticketId}/comments")
+    public ResponseEntity<List<TicketCommentResponse>> getComments(@PathVariable Long ticketId) {
+    return ResponseEntity.ok(ticketService.getComments(ticketId));
+}
+
+    @PatchMapping("/{ticketId}/comments/{commentId}")
+    public ResponseEntity<TicketCommentResponse> updateComment(
+        @PathVariable Long ticketId,
+        @PathVariable Long commentId,
+        @Valid @RequestBody UpdateCommentRequest request,
+        @RequestHeader("X-User-Id") Long actorUserId,
+        @RequestHeader(value = "X-User-Role", defaultValue = "USER") String actorRole
+) {
+    return ResponseEntity.ok(
+            ticketService.updateComment(ticketId, commentId, request, actorUserId, actorRole)
+    );
+}
+
+    @DeleteMapping("/{ticketId}/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+        @PathVariable Long ticketId,
+        @PathVariable Long commentId,
+        @RequestHeader("X-User-Id") Long actorUserId,
+        @RequestHeader(value = "X-User-Role", defaultValue = "USER") String actorRole
+) {
+    ticketService.deleteComment(ticketId, commentId, actorUserId, actorRole);
+    return ResponseEntity.noContent().build();
 }
 }
 
