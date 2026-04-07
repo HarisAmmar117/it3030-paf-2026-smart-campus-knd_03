@@ -108,6 +108,13 @@ public class BookingService {
         return mapToResponse(saved);
     }
 
+    public List<BookingResponse> getBookingsByUser(Long userId) {
+    return bookingRepository.findByUserId(userId)
+            .stream()
+            .map(this::mapToResponse)
+            .toList();
+    }
+
     // ------------------ MAPPER ------------------
     private BookingResponse mapToResponse(Booking booking) {
         BookingResponse response = new BookingResponse();

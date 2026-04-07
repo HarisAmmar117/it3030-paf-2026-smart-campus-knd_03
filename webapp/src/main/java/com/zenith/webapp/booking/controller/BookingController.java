@@ -22,7 +22,7 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
-    // CREATE
+    // CREATE by user
     @PostMapping
     public ResponseEntity<BookingResponse> createBooking(
             @RequestBody BookingRequest request,
@@ -64,5 +64,14 @@ public class BookingController {
     public ResponseEntity<String> deleteBooking(@PathVariable Long id) {
         bookingService.deleteBooking(id);
         return ResponseEntity.ok("Booking deleted successfully");
+    }
+
+
+    //USER specific bookings
+    @GetMapping("/my")
+    public ResponseEntity<List<BookingResponse>> getMyBookings(
+            @RequestHeader("userId") Long userId) {
+
+        return ResponseEntity.ok(bookingService.getBookingsByUser(userId));
     }
 }
