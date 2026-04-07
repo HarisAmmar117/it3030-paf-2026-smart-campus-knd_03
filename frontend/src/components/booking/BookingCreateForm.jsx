@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { createBooking } from "../../api/BookingApi";
+import { useState, useEffect } from "react";
+import { createBooking, getAllResources } from "../../api/BookingApi";
 import "./BookingCreateForm.css";
 
 const initialForm = {
@@ -12,9 +12,27 @@ const initialForm = {
 
 export default function BookingCreateForm() {
   const [form, setForm] = useState(initialForm);
+  const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingResources, setLoadingResources] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Load resources from backend
+  useEffect(() => {
+    const fetchResources = async () => {
+      setLoadingResources(true);
+      try {
+        const data = await getAllResources(); // Fetch all resources
+        setResources(data || []);
+      } catch (err) {
+        setError(err.message || "Failed to load resources");
+      } finally {
+        setLoadingResources(false);
+      }
+    };
+    fetchResources();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,7 +53,6 @@ export default function BookingCreateForm() {
       };
 
       const created = await createBooking(payload, 2);
-
       setSuccess(`Booking #${created.id} created successfully!`);
       setForm(initialForm);
     } catch (err) {
@@ -47,7 +64,6 @@ export default function BookingCreateForm() {
 
   return (
     <div className="booking-form-wrapper fade-in">
-
       {/* Header */}
       <div className="booking-form-header">
         <div className="booking-form-icon">
@@ -69,9 +85,7 @@ export default function BookingCreateForm() {
         </div>
         <div>
           <h2>Create Booking</h2>
-          <p className="booking-form-subtitle">
-            Reserve rooms, labs, or equipment
-          </p>
+          <p className="booking-form-subtitle">Reserve rooms, labs, or equipment</p>
         </div>
       </div>
 
@@ -82,18 +96,27 @@ export default function BookingCreateForm() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="booking-form">
 
-        {/* Resource ID */}
+        {/* Resource Dropdown */}
         <div className="form-group">
-          <label htmlFor="resourceId">Resource ID</label>
-          <input
-            id="resourceId"
-            name="resourceId"
-            type="number"
-            placeholder="Enter resource ID"
-            value={form.resourceId}
-            onChange={handleChange}
-            required
-          />
+          <label htmlFor="resourceId">Resource</label>
+          {loadingResources ? (
+            <div>Loading resources...</div>
+          ) : (
+            <select
+              id="resourceId"
+              name="resourceId"
+              value={form.resourceId}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select a resource</option>
+              {resources.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name} ({r.type})
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         {/* Time Row */}
@@ -154,7 +177,6 @@ export default function BookingCreateForm() {
         <button type="submit" className="btn-submit" disabled={loading}>
           {loading ? "Creating..." : "Create Booking"}
         </button>
-
       </form>
     </div>
   );

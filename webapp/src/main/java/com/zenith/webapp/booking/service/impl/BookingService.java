@@ -1,7 +1,7 @@
 package com.zenith.webapp.booking.service.impl;
 
 import com.zenith.webapp.booking.dto.request.BookingRequest;
-
+import com.zenith.webapp.booking.dto.request.UpdateBookingRequest;
 import com.zenith.webapp.booking.dto.response.BookingResponse;
 import com.zenith.webapp.booking.enums.BookingStatus;
 import com.zenith.webapp.booking.model.Booking;
@@ -73,7 +73,7 @@ public class BookingService {
 
     // ------------------ UPDATE BOOKING ------------------
     @Transactional
-    public BookingResponse updateBooking(Long bookingId, BookingRequest request) {
+    public BookingResponse updateBooking(Long bookingId, UpdateBookingRequest request) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
@@ -83,6 +83,7 @@ public class BookingService {
         booking.setResource(resource);
         booking.setStartTime(request.getStartTime());
         booking.setEndTime(request.getEndTime());
+        booking.setStatus(request.getStatus());
         booking.setPurpose(request.getPurpose());
         booking.setAttendees(request.getAttendees());
 

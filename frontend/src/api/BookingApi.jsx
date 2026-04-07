@@ -163,24 +163,42 @@ export async function updateBookingStatus(
 }
 
 // DELETE BOOKING
-export async function deleteBooking(bookingId, userId = 2) {
+export async function deleteBooking(bookingId) {
   const response = await fetch(`${BASE_URL}/api/bookings/${bookingId}`, {
     method: "DELETE",
-    headers: {
-      "userId": String(userId),
-    },
   });
 
   if (!response.ok) {
     let data = null;
     try {
       data = await response.json();
-    } catch {
-      data = null;
-    }
+    } catch {}
+    throw new Error((data?.error || data?.message) || "Failed to delete booking");
+  }
+}
 
+
+// GET ALL RESOURCES
+export async function getAllResources(type) {
+  const params = new URLSearchParams();
+  if (type) params.append("type", type);
+
+  const response = await fetch(`${BASE_URL}/api/resources?${params.toString()}`, {
+    method: "GET",
+  });
+
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = [];
+  }
+
+  if (!response.ok) {
     const message =
-      (data && (data.error || data.message)) || "Failed to delete booking";
+      (data && (data.error || data.message)) || "Failed to fetch resources";
     throw new Error(message);
   }
+
+  return data;
 }

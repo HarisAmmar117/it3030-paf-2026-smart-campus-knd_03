@@ -167,23 +167,32 @@
 }
 
 .badge {
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #fff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
+/* Status colors */
 .badge-pending {
-  background-color: #ffc107;
+  background: #fff3cd;
+  color: #856404;
 }
 
-.badge-confirmed {
-  background-color: #28a745;
+.badge-approved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-rejected {
+  background: #f8d7da;
+  color: #721c24;
 }
 
 .badge-cancelled {
-  background-color: #dc3545;
+  background: #e2e3e5;
+  color: #383d41;
 }
 
 .card.empty-state {
