@@ -109,7 +109,7 @@ public class BookingService {
     }
 
     public List<BookingResponse> getBookingsByUser(Long userId) {
-    return bookingRepository.findByUserId(userId)
+    return bookingRepository.findBookingsByUserId(userId)
             .stream()
             .map(this::mapToResponse)
             .toList();
