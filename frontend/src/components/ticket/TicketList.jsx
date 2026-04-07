@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
-import { getTickets } from "../../api/ticketApi";
+import { deleteTicket, getTickets, updateTicket } from "../../api/ticketApi";
 import "./TicketList.css";
 
 const STATUS_OPTIONS = ["", "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED"];
 const PRIORITY_OPTIONS = ["", "LOW", "MEDIUM", "HIGH", "CRITICAL"];
+const CATEGORY_OPTIONS = ["ELECTRICAL", "PLUMBING", "NETWORK", "HARDWARE", "SOFTWARE", "SAFETY", "OTHER"];
 
 function statusClass(status) {
   return `badge badge-${String(status || "").toLowerCase().replace("_", "-")}`;
@@ -19,6 +20,9 @@ export default function TicketList() {
   const [priority, setPriority] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [editTicketId, setEditTicketId] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const loadTickets = useCallback(async () => {
   setLoading(true);
@@ -40,6 +44,58 @@ export default function TicketList() {
   const onApplyFilters = (e) => {
     e.preventDefault();
     loadTickets();
+  };
+
+  const onStartUpdate = (ticket) => {
+    setEditTicketId(ticket.id);
+    setEditForm({
+      title: ticket.title,
+      description: ticket.description,
+      resourceLocation: ticket.resourceLocation,
+      preferredContactDetails: ticket.preferredContactDetails,
+      category: ticket.category,
+      priority: ticket.priority,
+    });
+  };
+
+  const onEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const onSaveUpdate = async (e) => {
+    e.preventDefault();
+    if (!editTicketId || !editForm) return;
+
+    setSavingEdit(true);
+    setError("");
+    try {
+      await updateTicket(editTicketId, editForm);
+      setEditTicketId(null);
+      setEditForm(null);
+      await loadTickets();
+    } catch (err) {
+      setError(err.message || "Unable to update ticket");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const onCancelUpdate = () => {
+    setEditTicketId(null);
+    setEditForm(null);
+  };
+
+  const onDeleteTicket = async (ticketId) => {
+    const confirmed = window.confirm("Delete this ticket?");
+    if (!confirmed) return;
+
+    try {
+      await deleteTicket(ticketId);
+      await loadTickets();
+    } catch (err) {
+      setError(err.message || "Unable to delete ticket");
+    }
   };
 
   return (
@@ -127,6 +183,113 @@ export default function TicketList() {
               <small>Created: {new Date(t.createdAt).toLocaleString()}</small>
               <small>Updated: {new Date(t.updatedAt).toLocaleString()}</small>
             </div>
+
+            <div className="ticket-actions">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => onStartUpdate(t)}
+              >
+                Update
+              </button>
+              <button
+                type="button"
+                className="btn-danger"
+                onClick={() => onDeleteTicket(t.id)}
+              >
+                Delete
+              </button>
+            </div>
+
+            {editTicketId === t.id && editForm ? (
+              <form className="ticket-edit-form" onSubmit={onSaveUpdate}>
+                <div className="ticket-edit-grid">
+                  <div className="form-group">
+                    <label htmlFor={`title-${t.id}`}>Title</label>
+                    <input
+                      id={`title-${t.id}`}
+                      name="title"
+                      value={editForm.title}
+                      onChange={onEditChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor={`category-${t.id}`}>Category</label>
+                    <select
+                      id={`category-${t.id}`}
+                      name="category"
+                      value={editForm.category}
+                      onChange={onEditChange}
+                      required
+                    >
+                      {CATEGORY_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label htmlFor={`description-${t.id}`}>Description</label>
+                    <textarea
+                      id={`description-${t.id}`}
+                      name="description"
+                      value={editForm.description}
+                      onChange={onEditChange}
+                      rows={3}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor={`location-${t.id}`}>Resource / Location</label>
+                    <input
+                      id={`location-${t.id}`}
+                      name="resourceLocation"
+                      value={editForm.resourceLocation}
+                      onChange={onEditChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor={`contact-${t.id}`}>Contact Details</label>
+                    <input
+                      id={`contact-${t.id}`}
+                      name="preferredContactDetails"
+                      value={editForm.preferredContactDetails}
+                      onChange={onEditChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor={`priority-${t.id}`}>Priority</label>
+                    <select
+                      id={`priority-${t.id}`}
+                      name="priority"
+                      value={editForm.priority}
+                      onChange={onEditChange}
+                      required
+                    >
+                      {PRIORITY_OPTIONS.filter(Boolean).map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="ticket-edit-actions">
+                  <button type="submit" className="btn-primary" disabled={savingEdit}>
+                    {savingEdit ? "Saving..." : "Save"}
+                  </button>
+                  <button type="button" className="btn-secondary" onClick={onCancelUpdate} disabled={savingEdit}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : null}
           </article>
         ))}
       </div>

@@ -11,6 +11,7 @@ import com.zenith.webapp.ticket.dto.response.TicketResponse;
 import com.zenith.webapp.ticket.enums.TicketPriority;
 import com.zenith.webapp.ticket.enums.TicketStatus;
 import org.springframework.web.multipart.MultipartFile;
+import com.zenith.webapp.ticket.dto.request.UpdateTicketRequest;
 
 import java.util.List;
 
@@ -37,6 +38,10 @@ public interface TicketService {
     void deleteComment(Long ticketId, Long commentId, Long actorUserId, String actorRole);
 
     List<TicketCommentResponse> getComments(Long ticketId);
+
+    TicketResponse updateTicketByRequester(Long ticketId, UpdateTicketRequest request, Long requesterId);
+
+    void deleteTicketByRequester(Long ticketId, Long requesterId);
 }
 
 

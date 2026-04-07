@@ -17,6 +17,10 @@ import com.zenith.webapp.ticket.enums.TicketStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
+import com.zenith.webapp.ticket.dto.request.UpdateTicketRequest;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -42,6 +46,25 @@ public class TicketController {
         @RequestParam(required = false) TicketPriority priority
 ) {
     return ResponseEntity.ok(ticketService.getTickets(status, priority));
+}
+
+    @PatchMapping("/{ticketId}")
+    public ResponseEntity<TicketResponse> updateTicketByRequester(
+        @PathVariable Long ticketId,
+        @Valid @RequestBody UpdateTicketRequest request,
+        @RequestHeader("X-User-Id") Long requesterId
+) {
+    return ResponseEntity.ok(ticketService.updateTicketByRequester(ticketId, request, requesterId));
+}
+
+
+    @DeleteMapping("/{ticketId}")
+    public ResponseEntity<Void> deleteTicketByRequester(
+        @PathVariable Long ticketId,
+        @RequestHeader("X-User-Id") Long requesterId
+) {
+    ticketService.deleteTicketByRequester(ticketId, requesterId);
+    return ResponseEntity.noContent().build();
 }
 }
 
