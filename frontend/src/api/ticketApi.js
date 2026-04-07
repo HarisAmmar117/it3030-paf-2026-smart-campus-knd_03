@@ -208,3 +208,74 @@ export async function deleteComment(
     throw new Error(message);
   }
 }
+
+// ========================
+// ATTACHMENT ENDPOINTS
+// ========================
+
+export async function getAttachments(ticketId) {
+  const response = await fetch(
+    `${BASE_URL}/api/tickets/${ticketId}/attachments`
+  );
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = [];
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to fetch attachments";
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function uploadAttachments(ticketId, files) {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+
+  const response = await fetch(
+    `${BASE_URL}/api/tickets/${ticketId}/attachments`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to upload attachments";
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function deleteAttachment(ticketId, attachmentId) {
+  const response = await fetch(
+    `${BASE_URL}/api/tickets/${ticketId}/attachments/${attachmentId}`,
+    { method: "DELETE" }
+  );
+  if (!response.ok) {
+    let data = null;
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+    const message =
+      (data && (data.error || data.message)) || "Failed to delete attachment";
+    throw new Error(message);
+  }
+}
+
+// Helper: build URL to view an uploaded image
+export function getAttachmentImageUrl(filePath) {
+  // filePath from backend is like "uploads/tickets/1/uuid_name.jpg"
+  return `${BASE_URL}/${filePath.replace(/\\\\/g, "/")}`;
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { deleteTicket, getTickets, updateTicket } from "../../api/ticketApi";
 import CommentSection from "./CommentSection";
+import AttachmentSection from "./AttachmentSection";
 import "./TicketList.css";
 
 const STATUS_OPTIONS = ["", "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED"];
@@ -25,10 +26,15 @@ export default function TicketList() {
   const [editForm, setEditForm] = useState(null);
   const [savingEdit, setSavingEdit] = useState(false);
   const [openComments, setOpenComments] = useState({});
+  const [openAttachments, setOpenAttachments] = useState({});
   const currentUserId = 101;
 
   const toggleComments = (ticketId) => {
     setOpenComments((prev) => ({ ...prev, [ticketId]: !prev[ticketId] }));
+  };
+
+  const toggleAttachments = (ticketId) => {
+    setOpenAttachments((prev) => ({ ...prev, [ticketId]: !prev[ticketId] }));
   };
 
   const loadTickets = useCallback(async () => {
@@ -308,14 +314,27 @@ export default function TicketList() {
               </form>
             ) : null}
 
-            {/* Comment toggle & section */}
-            <button
-              type="button"
-              className="comment-toggle-btn"
-              onClick={() => toggleComments(t.id)}
-            >
-              💬 {openComments[t.id] ? "Hide Comments" : "Comments"}
-            </button>
+            {/* Toggle buttons */}
+            <div className="ticket-toggle-row">
+              <button
+                type="button"
+                className="comment-toggle-btn"
+                onClick={() => toggleAttachments(t.id)}
+              >
+                📎 {openAttachments[t.id] ? "Hide Attachments" : `Attachments (${t.attachmentCount || 0})`}
+              </button>
+              <button
+                type="button"
+                className="comment-toggle-btn"
+                onClick={() => toggleComments(t.id)}
+              >
+                💬 {openComments[t.id] ? "Hide Comments" : "Comments"}
+              </button>
+            </div>
+
+            {openAttachments[t.id] && (
+              <AttachmentSection ticketId={t.id} />
+            )}
 
             {openComments[t.id] && (
               <CommentSection ticketId={t.id} currentUserId={currentUserId} />
