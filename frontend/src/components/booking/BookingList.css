@@ -211,3 +211,65 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+.booking-table-wrapper {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.booking-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.booking-table th,
+.booking-table td {
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.booking-table thead {
+  background: #f5f7fa;
+}
+
+.booking-table th {
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.booking-table tbody tr {
+  border-top: 1px solid #eee;
+  transition: 0.2s;
+}
+
+.booking-table tbody tr:hover {
+  background: #f9fbff;
+}
+
+/* Buttons inline */
+.booking-table td button {
+  margin-right: 6px;
+}
+
+/* Edit row */
+.edit-row {
+  background: #f1f6ff;
+}
+
+.edit-form-inline {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.edit-form-inline input,
+.edit-form-inline select {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}

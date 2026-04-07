@@ -39,7 +39,7 @@ export default function BookingList() {
       const data = await getBookings();
       const list = Array.isArray(data) ? data : [];
       setBookings(list);
-      setFilteredBookings(list); // initial
+      setFilteredBookings(list);
     } catch (err) {
       setError(err.message || "Unable to load bookings");
     } finally {
@@ -65,7 +65,7 @@ export default function BookingList() {
     loadResources();
   }, [loadBookings, loadResources]);
 
-  // ✅ FRONTEND FILTERING (AUTO 🔥)
+  // ✅ Frontend filtering
   useEffect(() => {
     let filtered = [...bookings];
 
@@ -85,14 +85,13 @@ export default function BookingList() {
     setFilteredBookings(filtered);
   }, [statusFilter, resourceFilter, bookings]);
 
-  // ✅ Start edit
+  // ✅ Edit
   const onStartUpdate = (booking) => {
     setEditBookingId(booking.bookingId);
     setEditForm({
       resourceId: booking.resourceId,
       startTime: booking.startTime,
       endTime: booking.endTime,
-      purpose: booking.purpose,
       attendees: booking.attendees,
       status: booking.status,
     });
@@ -144,10 +143,9 @@ export default function BookingList() {
       <div className="booking-list-header">
         <div>
           <h2>Bookings</h2>
-          <p>Manage all room, lab, and equipment bookings.</p>
+          <p>Manage all bookings</p>
         </div>
         <button
-          type="button"
           className="btn-secondary"
           onClick={loadBookings}
           disabled={loading}
@@ -166,9 +164,7 @@ export default function BookingList() {
           >
             <option value="">ALL</option>
             {STATUS_OPTIONS.filter(Boolean).map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
+              <option key={s}>{s}</option>
             ))}
           </select>
         </div>
@@ -176,7 +172,7 @@ export default function BookingList() {
         <div className="filter-group">
           <label>Resource</label>
           {loadingResources ? (
-            <div>Loading resources...</div>
+            <div>Loading...</div>
           ) : (
             <select
               value={resourceFilter}
@@ -195,162 +191,126 @@ export default function BookingList() {
 
       {error && <div className="alert alert-error">{error}</div>}
 
-      {!loading && filteredBookings.length === 0 && (
-        <div className="card empty-state">
-          <h3>No bookings found</h3>
-          <p>Try changing filters.</p>
-        </div>
-      )}
+      {/* TABLE */}
+      <div className="booking-table-wrapper">
+        <table className="booking-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Resource</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Attendees</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
 
-      <div className="booking-grid">
-        {filteredBookings.map((b) => (
-          <article className="booking-card" key={b.bookingId}>
-            <div className="booking-card-top">
-              <h3>
-                #{b.bookingId} {b.purpose}
-              </h3>
-              <span className={statusClass(b.status)}>
-                {b.status}
-              </span>
-            </div>
+          <tbody>
+            {filteredBookings.map((b) => {
+              const resourceName =
+                resources.find((r) => r.id === b.resourceId)?.name ||
+                b.resourceId;
 
-            <div className="booking-meta">
-              <div>
-                <strong>Resource:</strong> {b.resourceId}
-              </div>
-              <div>
-                <strong>Start:</strong>{" "}
-                {new Date(b.startTime).toLocaleString()}
-              </div>
-              <div>
-                <strong>End:</strong>{" "}
-                {new Date(b.endTime).toLocaleString()}
-              </div>
-              <div>
-                <strong>Attendees:</strong> {b.attendees}
-              </div>
-            </div>
+              return (
+                <>
+                  <tr key={b.bookingId}>
+                    <td>#{b.bookingId}</td>
+                    <td>{resourceName}</td>
+                    <td>{new Date(b.startTime).toLocaleString()}</td>
+                    <td>{new Date(b.endTime).toLocaleString()}</td>
+                    <td>{b.attendees}</td>
+                    <td>
+                      <span className={statusClass(b.status)}>
+                        {b.status}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        className="btn-secondary"
+                        onClick={() => onStartUpdate(b)}
+                      >
+                        Update
+                      </button>
+                      <button
+                        className="btn-danger"
+                        onClick={() => onDeleteBooking(b.bookingId)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
 
-            <div className="booking-actions">
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => onStartUpdate(b)}
-              >
-                Update
-              </button>
-              <button
-                type="button"
-                className="btn-danger"
-                onClick={() => onDeleteBooking(b.bookingId)}
-              >
-                Delete
-              </button>
-            </div>
+                  {/* EDIT ROW */}
+                  {editBookingId === b.bookingId && editForm && (
+                    <tr className="edit-row">
+                      <td colSpan="7">
+                        <form
+                          onSubmit={onSaveUpdate}
+                          className="edit-form-inline"
+                        >
+                          <select
+                            name="resourceId"
+                            value={editForm.resourceId}
+                            onChange={onEditChange}
+                          >
+                            {resources.map((r) => (
+                              <option key={r.id} value={r.id}>
+                                {r.name}
+                              </option>
+                            ))}
+                          </select>
 
-            {/* Edit Form */}
-            {editBookingId === b.bookingId && editForm && (
-              <form
-                className="booking-edit-form"
-                onSubmit={onSaveUpdate}
-              >
-                <div className="booking-edit-grid">
-                  <div className="form-group">
-                    <label>Resource</label>
-                    <select
-                      name="resourceId"
-                      value={editForm.resourceId}
-                      onChange={onEditChange}
-                      required
-                    >
-                      {resources.map((r) => (
-                        <option key={r.id} value={r.id}>
-                          {r.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                          <input
+                            type="datetime-local"
+                            name="startTime"
+                            value={editForm.startTime}
+                            onChange={onEditChange}
+                          />
 
-                  <div className="form-group">
-                    <label>Start Time</label>
-                    <input
-                      type="datetime-local"
-                      name="startTime"
-                      value={editForm.startTime}
-                      onChange={onEditChange}
-                      required
-                    />
-                  </div>
+                          <input
+                            type="datetime-local"
+                            name="endTime"
+                            value={editForm.endTime}
+                            onChange={onEditChange}
+                          />
 
-                  <div className="form-group">
-                    <label>End Time</label>
-                    <input
-                      type="datetime-local"
-                      name="endTime"
-                      value={editForm.endTime}
-                      onChange={onEditChange}
-                      required
-                    />
-                  </div>
+                          <input
+                            type="number"
+                            name="attendees"
+                            value={editForm.attendees}
+                            onChange={onEditChange}
+                          />
 
-                  <div className="form-group full-width">
-                    <label>Purpose</label>
-                    <input
-                      name="purpose"
-                      value={editForm.purpose}
-                      onChange={onEditChange}
-                      required
-                    />
-                  </div>
+                          <select
+                            name="status"
+                            value={editForm.status}
+                            onChange={onEditChange}
+                          >
+                            {STATUS_OPTIONS.filter(Boolean).map((s) => (
+                              <option key={s}>{s}</option>
+                            ))}
+                          </select>
 
-                  <div className="form-group">
-                    <label>Attendees</label>
-                    <input
-                      type="number"
-                      min="1"
-                      name="attendees"
-                      value={editForm.attendees}
-                      onChange={onEditChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Status</label>
-                    <select
-                      name="status"
-                      value={editForm.status}
-                      onChange={onEditChange}
-                    >
-                      {STATUS_OPTIONS.filter(Boolean).map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="booking-edit-actions">
-                  <button
-                    type="submit"
-                    className="btn-primary"
-                    disabled={savingEdit}
-                  >
-                    {savingEdit ? "Saving..." : "Save"}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={onCancelUpdate}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
-          </article>
-        ))}
+                          <button className="btn-primary" type="submit">
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={onCancelUpdate}
+                          >
+                            Cancel
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                  )}
+                </>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );
