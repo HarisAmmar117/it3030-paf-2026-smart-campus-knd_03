@@ -11,6 +11,8 @@ import com.zenith.webapp.facility.repository.ResourceRepository;
 import com.zenith.webapp.auth.model.User;
 import com.zenith.webapp.auth.repository.UserRepository;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +51,50 @@ public class BookingService {
 
         Booking saved = bookingRepository.save(booking);
         return mapToResponse(saved);
+    }
+
+    // ------------------ GET ALL BOOKINGS ------------------
+    public List<BookingResponse> getAllBookings() {
+        return bookingRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    // ------------------ GET SINGLE BOOKING ------------------
+    public BookingResponse getBookingById(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        return mapToResponse(booking);
+    }
+
+    // ------------------ UPDATE BOOKING ------------------
+    @Transactional
+    public BookingResponse updateBooking(Long bookingId, BookingRequest request) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        Resource resource = resourceRepository.findById(request.getResourceId())
+                .orElseThrow(() -> new RuntimeException("Resource not found"));
+
+        booking.setResource(resource);
+        booking.setStartTime(request.getStartTime());
+        booking.setEndTime(request.getEndTime());
+        booking.setPurpose(request.getPurpose());
+        booking.setAttendees(request.getAttendees());
+
+        Booking updated = bookingRepository.save(booking);
+        return mapToResponse(updated);
+    }
+
+    // ------------------ DELETE BOOKING ------------------
+    @Transactional
+    public void deleteBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        bookingRepository.delete(booking);
     }
 
     // ------------------ UPDATE STATUS ------------------
