@@ -4,7 +4,7 @@ import "./Navbar.css";
 // Top-level module links — each member's section
 const MODULE_LINKS = [
   { to: "/tickets", label: "🎫 Tickets", active: true },
-  { to: "/facilities", label: "🏢 Facilities", active: false },
+  { to: "/facilities", label: "🏢 Facilities", active: true },
   { to: "/bookings", label: "📅 Bookings", active: false },
   { to: "/notifications", label: "🔔 Notifications", active: false },
 ];
