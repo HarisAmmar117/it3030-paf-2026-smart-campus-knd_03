@@ -23,6 +23,7 @@ export default function TicketList() {
   const [editTicketId, setEditTicketId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  const currentUserId = 101;
 
   const loadTickets = useCallback(async () => {
   setLoading(true);
@@ -47,6 +48,8 @@ export default function TicketList() {
   };
 
   const onStartUpdate = (ticket) => {
+    if (!(ticket.status === "OPEN" && ticket.requesterId === currentUserId)) return;
+
     setEditTicketId(ticket.id);
     setEditForm({
       title: ticket.title,
@@ -160,6 +163,10 @@ export default function TicketList() {
       <div className="ticket-grid">
         {tickets.map((t) => (
           <article className="ticket-card" key={t.id}>
+            {(() => {
+              const canModify = t.status === "OPEN" && t.requesterId === currentUserId;
+              return (
+                <>
             <div className="ticket-card-top">
               <h3>#{t.id} {t.title}</h3>
               <span className={statusClass(t.status)}>{t.status}</span>
@@ -189,6 +196,8 @@ export default function TicketList() {
                 type="button"
                 className="btn-secondary"
                 onClick={() => onStartUpdate(t)}
+                disabled={!canModify}
+                title={canModify ? "Update ticket" : "Only your OPEN tickets can be updated"}
               >
                 Update
               </button>
@@ -196,6 +205,8 @@ export default function TicketList() {
                 type="button"
                 className="btn-danger"
                 onClick={() => onDeleteTicket(t.id)}
+                disabled={!canModify}
+                title={canModify ? "Delete ticket" : "Only your OPEN tickets can be deleted"}
               >
                 Delete
               </button>
@@ -290,6 +301,9 @@ export default function TicketList() {
                 </div>
               </form>
             ) : null}
+                </>
+              );
+            })()}
           </article>
         ))}
       </div>
