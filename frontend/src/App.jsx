@@ -23,9 +23,9 @@ import TicketListPage from "./pages/ticket/TicketListPage";
 // MEMBER 2 — Booking Pages
 // (Uncomment when Member 2 creates their pages)
 // ========================
-// import BookingLayout from "./pages/booking/BookingLayout";
-// import BookingListPage from "./pages/booking/BookingListPage";
-// import BookingCreatePage from "./pages/booking/BookingCreatePage";
+import BookingLayout from "./pages/booking/BookingLayout";
+import BookingListPage from "./pages/booking/BookingListPage";
+import BookingCreatePage from "./pages/booking/BookingCreatePage";
 
 // ========================
 // MEMBER 4 — Notification & Auth Pages
@@ -58,10 +58,10 @@ function App() {
           {/* </Route> */}
 
           {/* ====== MEMBER 2 — Bookings ====== */}
-          {/* <Route path="/bookings" element={<BookingLayout />}> */}
-          {/*   <Route index element={<BookingListPage />} /> */}
-          {/*   <Route path="create" element={<BookingCreatePage />} /> */}
-          {/* </Route> */}
+          <Route path="/bookings" element={<BookingLayout />}>
+            <Route index element={<BookingListPage />} />
+            <Route path="create" element={<BookingCreatePage />} />
+          </Route>
 
           {/* ====== MEMBER 4 — Notifications & Auth ====== */}
           {/* <Route path="/notifications" element={<NotificationLayout />}> */}
