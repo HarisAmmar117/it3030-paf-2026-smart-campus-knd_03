@@ -70,8 +70,12 @@ public class BookingController {
     //USER specific bookings
     @GetMapping("/my")
     public ResponseEntity<List<BookingResponse>> getMyBookings(
-            @RequestHeader("userId") Long userId) {
+            @RequestHeader("userId") Long userId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String resource) {
 
-        return ResponseEntity.ok(bookingService.getBookingsByUser(userId));
+        return ResponseEntity.ok(
+            bookingService.getBookingsByUser(userId, status, resource)
+        );
     }
 }
