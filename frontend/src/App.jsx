@@ -44,7 +44,7 @@ function App() {
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/tickets" replace />} />
 
-          {/* ====== MEMBER 3 — Tickets (YOU) ====== */}
+          {/* ====== MEMBER 3 — Tickets ====== */}
           <Route path="/tickets" element={<TicketLayout />}>
             <Route index element={<TicketListPage />} />
             <Route path="create" element={<TicketCreatePage />} />

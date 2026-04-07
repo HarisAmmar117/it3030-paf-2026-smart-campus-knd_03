@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.zenith.webapp.ticket.dto.request.UpdateTicketRequest;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -341,6 +342,45 @@ public class TicketServiceImpl implements TicketService {
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
+
+
+    @Override
+    public TicketResponse updateTicketByRequester(Long ticketId, UpdateTicketRequest request, Long requesterId) {
+    Ticket ticket = getTicketOrThrow(ticketId);
+
+    if (!ticket.getRequesterId().equals(requesterId)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update your own ticket");
+    }
+
+    if (ticket.getStatus() != TicketStatus.OPEN) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "Only OPEN tickets can be edited by requester");
+    }
+
+    ticket.setTitle(request.getTitle());
+    ticket.setDescription(request.getDescription());
+    ticket.setResourceLocation(request.getResourceLocation());
+    ticket.setPreferredContactDetails(request.getPreferredContactDetails());
+    ticket.setCategory(request.getCategory());
+    ticket.setPriority(request.getPriority());
+
+    Ticket updated = ticketRepository.save(ticket);
+    return toTicketResponse(updated);
+}
+
+    @Override
+    public void deleteTicketByRequester(Long ticketId, Long requesterId) {
+    Ticket ticket = getTicketOrThrow(ticketId);
+
+    if (!ticket.getRequesterId().equals(requesterId)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own ticket");
+    }
+
+    if (ticket.getStatus() != TicketStatus.OPEN) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "Only OPEN tickets can be deleted by requester");
+    }
+
+    ticketRepository.delete(ticket);
+}
 }
 
 

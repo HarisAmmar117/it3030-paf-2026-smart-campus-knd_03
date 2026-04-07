@@ -3,9 +3,11 @@ package com.zenith.webapp.facility.model;
 import com.zenith.webapp.facility.enums.Type;
 import com.zenith.webapp.facility.enums.Status;
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
 @Table(name = "resources")
+@Data
 public class Resource {
 
     @Id
