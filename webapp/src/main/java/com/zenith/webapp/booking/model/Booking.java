@@ -8,9 +8,11 @@ import com.zenith.webapp.booking.enums.BookingStatus;
 import com.zenith.webapp.facility.model.Resource;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
 @Table(name = "bookings")
+@Data
 public class Booking {
 
     @Id
