@@ -7,8 +7,6 @@ import lombok.Data;
 
 @Data
 public class BookingRequest {
-
-    private Long userId;
     private Long resourceId;
 
     private LocalDateTime startTime;
