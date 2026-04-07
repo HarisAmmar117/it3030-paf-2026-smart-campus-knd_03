@@ -1,7 +1,5 @@
 .ticket-list-shell {
-  max-width: 1120px;
-  margin: 32px auto;
-  padding: 0 16px 36px;
+  padding: 0;
 }
 
 .ticket-list-header {

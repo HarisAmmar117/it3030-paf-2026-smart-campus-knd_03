@@ -1,0 +1,43 @@
+/* ========== TICKET LAYOUT ========== */
+.ticket-layout {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+/* ========== SUB-TABS ========== */
+.ticket-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.ticket-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-light);
+  background: var(--bg-card);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.ticket-tab:hover {
+  color: var(--primary-700);
+  border-color: var(--primary-200);
+  background: var(--primary-50);
+}
+
+.ticket-tab-active {
+  color: #fff !important;
+  background: linear-gradient(135deg, var(--primary-600), var(--primary-700)) !important;
+  border-color: var(--primary-600) !important;
+  box-shadow: 0 2px 8px rgba(42, 56, 226, 0.25);
+  font-weight: 600;
+}
