@@ -27,6 +27,8 @@ import com.zenith.webapp.ticket.dto.request.UpdateCommentRequest;
 import com.zenith.webapp.ticket.dto.response.TicketAttachmentResponse;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
+import com.zenith.webapp.ticket.dto.request.AssignTicketRequest;
+import com.zenith.webapp.ticket.dto.request.UpdateTicketStatusRequest;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -132,6 +134,26 @@ public class TicketController {
 ) {
     ticketService.deleteAttachment(ticketId, attachmentId);
     return ResponseEntity.noContent().build();
+}
+
+    @PatchMapping("/{ticketId}/assign")
+    public ResponseEntity<TicketResponse> assignTicket(
+        @PathVariable Long ticketId,
+        @Valid @RequestBody AssignTicketRequest request,
+        @RequestHeader("X-User-Id") Long actorUserId,
+        @RequestHeader(value = "X-User-Role", defaultValue = "USER") String actorRole
+) {
+    return ResponseEntity.ok(ticketService.assignTicket(ticketId, request, actorUserId, actorRole));
+}
+
+    @PatchMapping("/{ticketId}/status")
+    public ResponseEntity<TicketResponse> updateStatus(
+        @PathVariable Long ticketId,
+        @Valid @RequestBody UpdateTicketStatusRequest request,
+        @RequestHeader("X-User-Id") Long actorUserId,
+        @RequestHeader(value = "X-User-Role", defaultValue = "USER") String actorRole
+) {
+    return ResponseEntity.ok(ticketService.updateStatus(ticketId, request, actorUserId, actorRole));
 }
 }
 
