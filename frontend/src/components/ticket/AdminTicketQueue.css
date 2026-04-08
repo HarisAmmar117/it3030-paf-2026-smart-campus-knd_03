@@ -1,0 +1,348 @@
+/* ========== ADMIN QUEUE ========== */
+.admin-queue {
+  padding: 0;
+}
+
+.admin-queue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.admin-queue-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.admin-queue-header p {
+  margin-top: 4px;
+}
+
+/* Filters */
+.admin-filters {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 20px;
+  align-items: end;
+}
+
+.admin-filters .filter-group {
+  flex: 1;
+}
+
+.admin-filters .btn-primary {
+  height: 44px;
+  white-space: nowrap;
+}
+
+/* ========== TICKET LIST (ACCORDION) ========== */
+.admin-ticket-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-ticket {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-ticket:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.admin-ticket-expanded {
+  border-color: var(--primary-200);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Top row (clickable) */
+.admin-ticket-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--transition-fast);
+}
+
+.admin-ticket-top:hover {
+  background: var(--gray-50);
+}
+
+.admin-ticket-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.admin-ticket-id {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary-500);
+  white-space: nowrap;
+}
+
+.admin-ticket-title-row h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-ticket-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.admin-status-badge {
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.admin-priority-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.admin-chevron {
+  transition: transform var(--transition-fast);
+  color: var(--gray-400);
+}
+
+.admin-chevron-open {
+  transform: rotate(180deg);
+}
+
+/* Summary row */
+.admin-ticket-summary {
+  display: flex;
+  gap: 18px;
+  padding: 0 20px 12px;
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  flex-wrap: wrap;
+}
+
+.admin-ticket-summary em {
+  color: var(--priority-high);
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* ========== EXPANDED PANEL ========== */
+.admin-panel {
+  border-top: 1px solid var(--border-light);
+  padding: 20px;
+  animation: fadeIn 0.25s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Detail section */
+.admin-desc {
+  font-size: 0.9rem;
+  color: var(--gray-600);
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+
+.admin-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--gray-600);
+}
+
+/* Notes boxes */
+.admin-notes-box {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.admin-notes-resolved {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  color: #047857;
+}
+
+.admin-notes-rejected {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  color: #b91c1c;
+}
+
+/* ========== ACTION SECTIONS ========== */
+.admin-action-section {
+  padding: 16px;
+  background: var(--gray-50);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+}
+
+.admin-action-section h4 {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  color: var(--gray-700);
+}
+
+.admin-action-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.admin-input {
+  flex: 1;
+  max-width: 200px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+}
+
+/* Action buttons */
+.admin-action-btn {
+  padding: 8px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: none;
+}
+
+.admin-btn-assign {
+  background: var(--primary-600);
+  color: #fff;
+}
+
+.admin-btn-assign:hover:not(:disabled) {
+  background: var(--primary-500);
+}
+
+.admin-btn-confirm {
+  background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(42, 56, 226, 0.2);
+}
+
+.admin-btn-confirm:hover:not(:disabled) {
+  box-shadow: 0 4px 14px rgba(42, 56, 226, 0.3);
+  transform: translateY(-1px);
+}
+
+.admin-btn-cancel {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.admin-btn-cancel:hover {
+  background: var(--gray-200);
+}
+
+.admin-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ========== STATUS WORKFLOW BUTTONS ========== */
+.admin-status-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.admin-status-option {
+  padding: 7px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1.5px solid var(--border-light);
+  border-radius: 100px;
+  background: var(--bg-card);
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: none;
+}
+
+.admin-status-option:hover {
+  border-color: var(--btn-color);
+  color: var(--btn-color);
+  background: var(--btn-bg);
+}
+
+.admin-status-selected {
+  border-color: var(--btn-color) !important;
+  color: var(--btn-color) !important;
+  background: var(--btn-bg) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--btn-color) 12%, transparent);
+}
+
+/* Notes textarea */
+.admin-notes-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  resize: vertical;
+  min-height: 60px;
+  margin-bottom: 4px;
+  background: #fff;
+}
+
+.admin-notes-input:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(63, 87, 237, 0.1);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .admin-filters {
+    flex-direction: column;
+  }
+
+  .admin-ticket-summary {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .admin-action-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-input {
+    max-width: none;
+  }
+}

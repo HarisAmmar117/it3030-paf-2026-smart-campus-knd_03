@@ -1,57 +1,45 @@
 package com.zenith.webapp.booking.model;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.zenith.webapp.auth.model.User;
 import com.zenith.webapp.booking.enums.BookingStatus;
+import com.zenith.webapp.facility.model.Resource;
+
+import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
-@Table(name = "booking")
+@Table(name = "bookings")
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class Booking {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long bookingId;
-    
+    private Long booking_id;
+
+    // Many bookings → One user
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-    
-    // @ManyToOne
-    // @JoinColumn(name = "resource_id", nullable = false)
-    // private Resource resource;
-    
+    private com.zenith.webapp.auth.model.User user;
+
+    // Many bookings → One resource
+    @ManyToOne
+    @JoinColumn(name = "resource_id", nullable = false)
+    private Resource resource;
+
+
+    @CreationTimestamp
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    
-    @Column(columnDefinition = "TEXT")
+
     private String purpose;
-    
-    private Integer expectedAttendees;
-    
+    private int attendees;
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private BookingStatus status = BookingStatus.PENDING; 
-    
-    @Column(columnDefinition = "TEXT")
-    private String rejectionReason;
-    
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-    private LocalDateTime approvedAt;
-    
-    @Column(columnDefinition = "TEXT")
-    private String approvalNotes;
-    
-    
+    private BookingStatus status = BookingStatus.PENDING;
+
+
+ 
 }

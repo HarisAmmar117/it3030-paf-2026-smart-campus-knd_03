@@ -158,6 +158,39 @@
   text-align: center;
 }
 
+/* Comment toggle */
+.comment-toggle-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--gray-500);
+  background: var(--gray-50);
+  border: 1px dashed var(--border-light);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: none;
+}
+
+.comment-toggle-btn:hover {
+  color: var(--primary-600);
+  background: var(--primary-50);
+  border-color: var(--primary-200);
+}
+
+.ticket-toggle-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ticket-toggle-row .comment-toggle-btn {
+  flex: 1;
+  margin-top: 0;
+}
+
 @media (max-width: 768px) {
   .ticket-filters {
     grid-template-columns: 1fr;

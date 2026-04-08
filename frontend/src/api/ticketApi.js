@@ -100,3 +100,239 @@ export async function deleteTicket(ticketId, userId = 101) {
     throw new Error(message);
   }
 }
+
+// ========================
+// COMMENT ENDPOINTS
+// ========================
+
+export async function getComments(ticketId) {
+  const response = await fetch(`${BASE_URL}/api/tickets/${ticketId}/comments`);
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = [];
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to fetch comments";
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function addComment(ticketId, content, userId = 101) {
+  const response = await fetch(
+    `${BASE_URL}/api/tickets/${ticketId}/comments`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-User-Id": String(userId),
+      },
+      body: JSON.stringify({ content }),
+    }
+  );
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to add comment";
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function updateComment(
+  ticketId,
+  commentId,
+  content,
+  userId = 101,
+  role = "USER"
+) {
+  const response = await fetch(
+    `${BASE_URL}/api/tickets/${ticketId}/comments/${commentId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "X-User-Id": String(userId),
+        "X-User-Role": role,
+      },
+      body: JSON.stringify({ content }),
+    }
+  );
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to update comment";
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function deleteComment(
+  ticketId,
+  commentId,
+  userId = 101,
+  role = "USER"
+) {
+  const response = await fetch(
+    `${BASE_URL}/api/tickets/${ticketId}/comments/${commentId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "X-User-Id": String(userId),
+        "X-User-Role": role,
+      },
+    }
+  );
+  if (!response.ok) {
+    let data = null;
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+    const message =
+      (data && (data.error || data.message)) || "Failed to delete comment";
+    throw new Error(message);
+  }
+}
+
+// ========================
+// ATTACHMENT ENDPOINTS
+// ========================
+
+export async function getAttachments(ticketId) {
+  const response = await fetch(
+    `${BASE_URL}/api/tickets/${ticketId}/attachments`
+  );
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = [];
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to fetch attachments";
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function uploadAttachments(ticketId, files) {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+
+  const response = await fetch(
+    `${BASE_URL}/api/tickets/${ticketId}/attachments`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to upload attachments";
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function deleteAttachment(ticketId, attachmentId) {
+  const response = await fetch(
+    `${BASE_URL}/api/tickets/${ticketId}/attachments/${attachmentId}`,
+    { method: "DELETE" }
+  );
+  if (!response.ok) {
+    let data = null;
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+    const message =
+      (data && (data.error || data.message)) || "Failed to delete attachment";
+    throw new Error(message);
+  }
+}
+
+// Helper: build URL to view an uploaded image
+export function getAttachmentImageUrl(filePath) {
+  // filePath from backend is like "uploads/tickets/1/uuid_name.jpg"
+  return `${BASE_URL}/${filePath.replace(/\\\\/g, "/")}`;
+}
+
+// ========================
+// ADMIN ENDPOINTS
+// ========================
+
+export async function assignTicket(ticketId, assigneeId, userId = 1, role = "ADMIN") {
+  const response = await fetch(`${BASE_URL}/api/tickets/${ticketId}/assign`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "X-User-Id": String(userId),
+      "X-User-Role": role,
+    },
+    body: JSON.stringify({ assigneeId }),
+  });
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to assign ticket";
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function updateTicketStatus(
+  ticketId,
+  payload,
+  userId = 1,
+  role = "ADMIN"
+) {
+  const response = await fetch(`${BASE_URL}/api/tickets/${ticketId}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "X-User-Id": String(userId),
+      "X-User-Role": role,
+    },
+    body: JSON.stringify(payload),
+  });
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to update status";
+    throw new Error(message);
+  }
+  return data;
+}

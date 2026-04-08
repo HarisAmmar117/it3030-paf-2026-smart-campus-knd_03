@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { deleteTicket, getTickets, updateTicket } from "../../api/ticketApi";
+import CommentSection from "./CommentSection";
+import AttachmentSection from "./AttachmentSection";
 import "./TicketList.css";
 
 const STATUS_OPTIONS = ["", "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED"];
@@ -23,6 +25,17 @@ export default function TicketList() {
   const [editTicketId, setEditTicketId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [openComments, setOpenComments] = useState({});
+  const [openAttachments, setOpenAttachments] = useState({});
+  const currentUserId = 101;
+
+  const toggleComments = (ticketId) => {
+    setOpenComments((prev) => ({ ...prev, [ticketId]: !prev[ticketId] }));
+  };
+
+  const toggleAttachments = (ticketId) => {
+    setOpenAttachments((prev) => ({ ...prev, [ticketId]: !prev[ticketId] }));
+  };
 
   const loadTickets = useCallback(async () => {
   setLoading(true);
@@ -47,6 +60,8 @@ export default function TicketList() {
   };
 
   const onStartUpdate = (ticket) => {
+    if (!(ticket.status === "OPEN" && ticket.requesterId === currentUserId)) return;
+
     setEditTicketId(ticket.id);
     setEditForm({
       title: ticket.title,
@@ -160,6 +175,10 @@ export default function TicketList() {
       <div className="ticket-grid">
         {tickets.map((t) => (
           <article className="ticket-card" key={t.id}>
+            {(() => {
+              const canModify = t.status === "OPEN" && t.requesterId === currentUserId;
+              return (
+                <>
             <div className="ticket-card-top">
               <h3>#{t.id} {t.title}</h3>
               <span className={statusClass(t.status)}>{t.status}</span>
@@ -189,6 +208,8 @@ export default function TicketList() {
                 type="button"
                 className="btn-secondary"
                 onClick={() => onStartUpdate(t)}
+                disabled={!canModify}
+                title={canModify ? "Update ticket" : "Only your OPEN tickets can be updated"}
               >
                 Update
               </button>
@@ -196,6 +217,8 @@ export default function TicketList() {
                 type="button"
                 className="btn-danger"
                 onClick={() => onDeleteTicket(t.id)}
+                disabled={!canModify}
+                title={canModify ? "Delete ticket" : "Only your OPEN tickets can be deleted"}
               >
                 Delete
               </button>
@@ -290,6 +313,35 @@ export default function TicketList() {
                 </div>
               </form>
             ) : null}
+
+            {/* Toggle buttons */}
+            <div className="ticket-toggle-row">
+              <button
+                type="button"
+                className="comment-toggle-btn"
+                onClick={() => toggleAttachments(t.id)}
+              >
+                📎 {openAttachments[t.id] ? "Hide Attachments" : `Attachments (${t.attachmentCount || 0})`}
+              </button>
+              <button
+                type="button"
+                className="comment-toggle-btn"
+                onClick={() => toggleComments(t.id)}
+              >
+                💬 {openComments[t.id] ? "Hide Comments" : "Comments"}
+              </button>
+            </div>
+
+            {openAttachments[t.id] && (
+              <AttachmentSection ticketId={t.id} />
+            )}
+
+            {openComments[t.id] && (
+              <CommentSection ticketId={t.id} currentUserId={currentUserId} />
+            )}
+                </>
+              );
+            })()}
           </article>
         ))}
       </div>
