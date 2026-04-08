@@ -10,7 +10,7 @@ import Navbar from "./components/common/Navbar";
 import TicketLayout from "./pages/ticket/TicketLayout";
 import TicketCreatePage from "./pages/ticket/TicketCreatePage";
 import TicketListPage from "./pages/ticket/TicketListPage";
-// import AdminTicketPage from "./pages/ticket/AdminTicketPage";
+import AdminTicketPage from "./pages/ticket/AdminTicketPage";
 
 // ========================
 // MEMBER 1 — Facility Pages
