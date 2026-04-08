@@ -1,0 +1,121 @@
+/* ========== FORM WRAPPER ========== */
+.resource-form-wrapper {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+/* ========== HEADER ========== */
+.resource-form-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 28px 32px;
+  background: linear-gradient(135deg, var(--primary-900), var(--primary-800));
+  color: #fff;
+}
+
+.resource-form-header h2 {
+  color: #fff;
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.resource-form-subtitle {
+  color: rgba(255, 255, 255, 0.65) !important;
+  font-size: 0.875rem;
+  margin-top: 2px;
+}
+
+.resource-form-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  color: var(--accent-300);
+  flex-shrink: 0;
+}
+
+/* ========== FORM BODY ========== */
+.resource-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 32px;
+}
+
+/* ========== STATUS SELECTOR ========== */
+.status-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.status-option {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--border-light);
+  border-radius: 100px;
+  cursor: pointer;
+  font-size: 0.825rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  background: var(--bg-input);
+  transition: all var(--transition-fast);
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: 0;
+  user-select: none;
+}
+
+.status-option input[type="radio"] {
+  display: none;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--status-color);
+  opacity: 0.4;
+  transition: all var(--transition-fast);
+}
+
+.status-option:hover {
+  border-color: var(--gray-300);
+  background: #fff;
+}
+
+.status-active {
+  border-color: var(--status-color);
+  background: #fff;
+  color: var(--gray-800);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--status-color) 12%, transparent);
+}
+
+.status-active .status-dot {
+  opacity: 1;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--status-color) 40%, transparent);
+}
+
+/* ========== ALERTS ========== */
+.resource-form-wrapper > .alert {
+  margin: 0 32px;
+  margin-top: 24px;
+}
+
+/* ========== VALIDATION ========== */
+.error-text {
+  color: #dc2626;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  display: block;
+}
