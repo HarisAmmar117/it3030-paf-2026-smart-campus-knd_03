@@ -3,57 +3,57 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { getResources, deleteResource } from '../../api/resourceApi';
 import './ResourceList.css';
 
+// Import Assets
+import roomImg from '../../assets/room.png';
+import confRoomImg from '../../assets/conference_room.png';
+import lectRoomImg from '../../assets/lecture_hall.png';
+import studyRoomImg from '../../assets/study_room.png';
+
+import labImg from '../../assets/lab.png';
+import chemLabImg from '../../assets/chemistry_lab.png';
+import compLabImg from '../../assets/computer_lab.png';
+import dataLabImg from '../../assets/data_science_lab.png';
+import netLabImg from '../../assets/network_lab.png';
+
+import equipImg from '../../assets/equipment.png';
+import projImg from '../../assets/projector.png';
+import dslrImg from '../../assets/dslr_camera.png';
+import paImg from '../../assets/pa_system.png';
+import macImg from '../../assets/mac_workstation.png';
+
 const TYPE_OPTIONS = ['', 'ROOM', 'LAB', 'EQUIPMENT'];
 
 function statusClass(status) {
   return `badge badge-${String(status || '').toLowerCase().replaceAll('_', '-')}`;
 }
 
-// SVG Icon components for different resource types
-const ResourceIcon = ({ type, name }) => {
-  const iconProps = { width: "48", height: "48", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5" };
+const getImageForResource = (type, name) => {
+  const n = (name || '').toLowerCase();
   
-  // Room icon
   if (type === 'ROOM') {
-    return (
-      <svg {...iconProps}>
-        <rect x="4" y="10" width="6" height="11" rx="1" />
-        <rect x="14" y="6" width="6" height="15" rx="1" />
-        <path d="M4 4v6M14 4v2M2 21h20" />
-      </svg>
-    );
+    if (n.includes('conference')) return confRoomImg;
+    if (n.includes('lecture')) return lectRoomImg;
+    if (n.includes('study')) return studyRoomImg;
+    return roomImg;
   }
   
-  // Lab icon
   if (type === 'LAB') {
-    return (
-      <svg {...iconProps}>
-        <path d="M12 2L2 7l10 5 10-5-10-5z" />
-        <path d="M2 17l10 5 10-5" />
-        <path d="M2 12l10 5 10-5" />
-      </svg>
-    );
+    if (n.includes('chemistry')) return chemLabImg;
+    if (n.includes('computer')) return compLabImg;
+    if (n.includes('data')) return dataLabImg;
+    if (n.includes('network')) return netLabImg;
+    return labImg;
   }
   
-  // Equipment icon
   if (type === 'EQUIPMENT') {
-    return (
-      <svg {...iconProps}>
-        <circle cx="12" cy="12" r="10" />
-        <path d="M12 8v4M12 16h.01" />
-      </svg>
-    );
+    if (n.includes('projector')) return projImg;
+    if (n.includes('camera') || n.includes('dslr')) return dslrImg;
+    if (n.includes('pa') || n.includes('audio')) return paImg;
+    if (n.includes('mac') || n.includes('apple')) return macImg;
+    return equipImg;
   }
   
-  // Default icon
-  return (
-    <svg {...iconProps}>
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-      <line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" />
-      <line x1="3" y1="10" x2="21" y2="10" />
-    </svg>
-  );
+  return roomImg;
 };
 
 const ResourceList = () => {
@@ -242,9 +242,9 @@ const ResourceList = () => {
                 <div className="resource-grid">
                     {filteredResources.map((resource) => (
                         <article className="resource-card" key={resource.id}>
-                            {/* Resource Icon */}
+                            {/* Resource Image */}
                             <div className="resource-card-icon">
-                                <ResourceIcon type={resource.type} name={resource.name} />
+                                <img src={getImageForResource(resource.type, resource.name)} alt={resource.name} />
                                 <span className={`resource-type-badge ${resource.type.toLowerCase()}`}>
                                     {resource.type}
                                 </span>
