@@ -265,11 +265,17 @@
   font-size: 0.85rem;
   font-family: inherit;
   resize: vertical;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.comment-edit-input::placeholder {
+  color: var(--text-tertiary);
 }
 
 .comment-edit-input:focus {
   outline: none;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
@@ -334,11 +340,17 @@
   font-size: 0.85rem;
   font-family: inherit;
   resize: vertical;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.comment-input::placeholder {
+  color: var(--text-tertiary);
 }
 
 .comment-input:focus {
   outline: none;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }

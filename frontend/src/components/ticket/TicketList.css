@@ -553,6 +553,12 @@
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
+.ticket-edit-form .field-error {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+
 .ticket-edit-actions {
   margin-top: 16px;
   display: flex;
