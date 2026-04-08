@@ -49,25 +49,25 @@
   --shadow-lg: 0 10px 40px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* ========== CONTAINER ========== */
-.notification-container {
-  min-height: calc(100vh - 200px);
+/* ========== MAIN CONTAINER ========== */
+.notification-list-shell {
   padding: 0;
-  background: var(--bg-primary);
+  animation: fadeIn 0.4s ease-out;
 }
 
-.notification-card {
-  max-width: 1400px;
-  margin: 0 auto;
-  background: var(--bg-secondary);
-  border-radius: 20px;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border-light);
-  overflow: hidden;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ========== HEADER ========== */
-.notification-header {
+.notification-list-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -94,7 +94,7 @@
   color: var(--accent);
 }
 
-.notification-header h2 {
+.notification-list-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
@@ -116,7 +116,7 @@
   font-weight: 600;
 }
 
-.notification-header p {
+.notification-list-header p {
   margin-top: 6px;
   color: var(--text-tertiary);
   font-size: 0.85rem;
@@ -151,6 +151,11 @@
   color: var(--accent);
 }
 
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .mark-all-btn {
   background: var(--accent-light);
   border: 1px solid var(--accent-border);
@@ -163,7 +168,7 @@
   border-color: var(--accent);
 }
 
-/* ========== FILTERS SECTION - Matching TicketList ========== */
+/* ========== FILTERS SECTION ========== */
 .notification-filters {
   padding: 20px 28px;
   display: flex;
@@ -337,6 +342,11 @@
 .btn-submit:hover:not(:disabled) {
   background: var(--accent-hover);
   transform: translateY(-1px);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btn-cancel {
@@ -638,10 +648,19 @@
   background: var(--accent-hover);
 }
 
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .edit-form-actions .btn-cancel {
   background: var(--bg-tertiary);
   border: 1px solid var(--border-medium);
   color: var(--text-secondary);
+}
+
+.edit-form-actions .btn-cancel:hover {
+  background: var(--border-light);
 }
 
 /* ========== EMPTY STATE ========== */
@@ -682,11 +701,7 @@
 
 /* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
-  .notification-container {
-    padding: 0;
-  }
-
-  .notification-header {
+  .notification-list-header {
     padding: 20px;
     flex-direction: column;
   }
