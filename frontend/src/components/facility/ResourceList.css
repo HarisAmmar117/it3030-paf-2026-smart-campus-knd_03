@@ -1,0 +1,184 @@
+.resource-list-shell {
+  padding: 0;
+}
+
+.resource-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.resource-list-header h2 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.resource-list-header p {
+  margin-top: 4px;
+  color: var(--gray-600);
+}
+
+/* Filters */
+.resource-filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: 14px;
+  margin-bottom: 18px;
+  align-items: end;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.9));
+}
+
+.resource-filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.resource-filter-actions {
+  display: flex;
+  align-items: end;
+}
+
+/* Resource Cards Grid */
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 18px;
+}
+
+.resource-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.resource-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Card Image */
+.resource-card-image {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.resource-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.resource-card:hover .resource-card-image img {
+  transform: scale(1.05);
+}
+
+.resource-type-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(6px);
+  border-radius: 100px;
+}
+
+/* Card Body */
+.resource-card-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.resource-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.resource-card-top h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.35;
+}
+
+.resource-desc {
+  font-size: 0.93rem;
+  margin-bottom: 12px;
+  color: var(--gray-600);
+}
+
+.resource-meta {
+  display: grid;
+  gap: 6px;
+  font-size: 0.88rem;
+  color: var(--gray-700);
+  flex-grow: 1;
+}
+
+.resource-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-light);
+  display: grid;
+  gap: 3px;
+  color: var(--gray-500);
+}
+
+.resource-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.resource-actions .btn-secondary,
+.resource-actions .btn-danger {
+  padding: 8px 14px;
+  font-size: 0.82rem;
+}
+
+/* Status badges for resources */
+.badge-available,
+.badge-active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.badge-maintenance,
+.badge-out-of-service {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+/* Empty state */
+.resource-empty-state {
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .resource-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .resource-grid {
+    grid-template-columns: 1fr;
+  }
+}

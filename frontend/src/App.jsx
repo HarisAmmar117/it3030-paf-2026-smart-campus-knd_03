@@ -5,7 +5,7 @@ import "./App.css";
 import Navbar from "./components/common/Navbar";
 
 // ========================
-// MEMBER 3 — Ticket Pages (YOUR pages)
+// MEMBER 3 — Ticket Pages
 // ========================
 import TicketLayout from "./pages/ticket/TicketLayout";
 import TicketCreatePage from "./pages/ticket/TicketCreatePage";
@@ -13,11 +13,11 @@ import TicketListPage from "./pages/ticket/TicketListPage";
 
 // ========================
 // MEMBER 1 — Facility Pages
-// (Uncomment when Member 1 creates their pages)
 // ========================
-// import FacilityLayout from "./pages/facility/FacilityLayout";
-// import FacilityListPage from "./pages/facility/FacilityListPage";
-// import FacilityCreatePage from "./pages/facility/FacilityCreatePage";
+import FacilityLayout from "./pages/facility/FacilityLayout";
+import FacilityListPage from "./pages/facility/FacilityListPage";
+import FacilityCreatePage from "./pages/facility/FacilityCreatePage";
+import FacilityEditPage from "./pages/facility/FacilityEditPage";
 
 // ========================
 // MEMBER 2 — Booking Pages
@@ -48,14 +48,14 @@ function App() {
           <Route path="/tickets" element={<TicketLayout />}>
             <Route index element={<TicketListPage />} />
             <Route path="create" element={<TicketCreatePage />} />
-            {/* <Route path=":id" element={<TicketDetailPage />} /> */}
           </Route>
 
           {/* ====== MEMBER 1 — Facilities ====== */}
-          {/* <Route path="/facilities" element={<FacilityLayout />}> */}
-          {/*   <Route index element={<FacilityListPage />} /> */}
-          {/*   <Route path="create" element={<FacilityCreatePage />} /> */}
-          {/* </Route> */}
+          <Route path="/facilities" element={<FacilityLayout />}>
+            <Route index element={<FacilityListPage />} />
+            <Route path="add" element={<FacilityCreatePage />} />
+            <Route path="edit/:id" element={<FacilityEditPage />} />
+          </Route>
 
           {/* ====== MEMBER 2 — Bookings ====== */}
           {/* <Route path="/bookings" element={<BookingLayout />}> */}

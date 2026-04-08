@@ -9,6 +9,7 @@ public class ResourceRequestDTO {
     private String name;
     private Type type;
     private int capacity;
+    private int quantity;
     private String location;
     private String availabilityWindow;
     private Status status;
@@ -36,6 +37,14 @@ public class ResourceRequestDTO {
 
     public void setCapacity(int capacity) {
         this.capacity = capacity;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     public String getLocation() {

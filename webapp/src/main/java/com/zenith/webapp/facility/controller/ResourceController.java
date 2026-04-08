@@ -29,6 +29,7 @@ public class ResourceController {
         dto.setName(resource.getName());
         dto.setType(resource.getType());
         dto.setCapacity(resource.getCapacity());
+        dto.setQuantity(resource.getQuantity());
         dto.setLocation(resource.getLocation());
         dto.setAvailabilityWindow(resource.getAvailabilityWindow());
         dto.setStatus(resource.getStatus());
@@ -41,6 +42,7 @@ public class ResourceController {
         resource.setName(dto.getName());
         resource.setType(dto.getType());
         resource.setCapacity(dto.getCapacity());
+        resource.setQuantity(dto.getQuantity());
         resource.setLocation(dto.getLocation());
         resource.setAvailabilityWindow(dto.getAvailabilityWindow());
         resource.setStatus(dto.getStatus());
@@ -89,6 +91,7 @@ public class ResourceController {
             resourceToUpdate.setName(requestDTO.getName());
             resourceToUpdate.setType(requestDTO.getType());
             resourceToUpdate.setCapacity(requestDTO.getCapacity());
+            resourceToUpdate.setQuantity(requestDTO.getQuantity());
             resourceToUpdate.setLocation(requestDTO.getLocation());
             resourceToUpdate.setAvailabilityWindow(requestDTO.getAvailabilityWindow());
             resourceToUpdate.setStatus(requestDTO.getStatus());

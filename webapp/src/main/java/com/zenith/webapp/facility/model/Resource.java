@@ -24,6 +24,9 @@ public class Resource {
     @Column(columnDefinition = "int default 0")
     private int capacity;
 
+    @Column(columnDefinition = "int default 0")
+    private int quantity;
+
     @Column(nullable = false)
     private String location;
 
@@ -45,6 +48,9 @@ public class Resource {
 
     public int getCapacity() { return capacity; }
     public void setCapacity(int capacity) { this.capacity = capacity; }
+
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
