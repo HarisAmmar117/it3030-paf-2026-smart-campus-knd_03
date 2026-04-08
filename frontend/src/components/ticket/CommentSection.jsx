@@ -121,16 +121,7 @@ export default function CommentSection({ ticketId, currentUserId = 101 }) {
     <div className="comment-section">
       {/* Header */}
       <div className="comment-header">
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
         </svg>
         <span>
@@ -142,17 +133,32 @@ export default function CommentSection({ ticketId, currentUserId = 101 }) {
       </div>
 
       {/* Error */}
-      {error && <div className="comment-error">{error}</div>}
+      {error && (
+        <div className="comment-error">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          {error}
+        </div>
+      )}
 
       {/* Comment list */}
       <div className="comment-list">
         {loading && comments.length === 0 && (
-          <div className="comment-loading">Loading comments...</div>
+          <div className="comment-loading">
+            <div className="spinner-small"></div>
+            <span>Loading comments...</span>
+          </div>
         )}
 
         {!loading && comments.length === 0 && (
           <div className="comment-empty">
-            No comments yet. Be the first to comment.
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <p>No comments yet. Be the first to comment.</p>
           </div>
         )}
 
@@ -166,7 +172,17 @@ export default function CommentSection({ ticketId, currentUserId = 101 }) {
             <div className="comment-item" key={c.id}>
               {/* Avatar */}
               <div className="comment-avatar">
-                {isOwner ? "You" : `U${c.authorId}`}
+                {isOwner ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                )}
               </div>
 
               {/* Body */}
@@ -200,7 +216,16 @@ export default function CommentSection({ ticketId, currentUserId = 101 }) {
                         onClick={() => handleSaveEdit(c.id)}
                         disabled={savingEdit || !editContent.trim()}
                       >
-                        {savingEdit ? "Saving..." : "Save"}
+                        {savingEdit ? (
+                          <span className="spinner-small"></span>
+                        ) : (
+                          <>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Save
+                          </>
+                        )}
                       </button>
                       <button
                         type="button"
@@ -220,17 +245,25 @@ export default function CommentSection({ ticketId, currentUserId = 101 }) {
                       <div className="comment-actions">
                         <button
                           type="button"
-                          className="comment-action-btn"
+                          className="comment-action-btn edit"
                           onClick={() => handleStartEdit(c)}
                         >
-                          ✏️ Edit
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M17 3l4 4-7 7H10v-4l7-7z" />
+                            <path d="M4 20h16" />
+                          </svg>
+                          Edit
                         </button>
                         <button
                           type="button"
-                          className="comment-action-btn comment-action-delete"
+                          className="comment-action-btn delete"
                           onClick={() => handleDelete(c.id)}
                         >
-                          🗑️ Delete
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M4 7h16M10 11v6M14 11v6M5 7l1 13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-13" />
+                            <path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" />
+                          </svg>
+                          Delete
                         </button>
                       </div>
                     )}
@@ -257,18 +290,9 @@ export default function CommentSection({ ticketId, currentUserId = 101 }) {
           disabled={submitting || !newComment.trim()}
         >
           {submitting ? (
-            <span className="spinner" />
+            <span className="spinner-small" />
           ) : (
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="22" y1="2" x2="11" y2="13" />
               <polygon points="22 2 15 22 11 13 2 9 22 2" />
             </svg>
