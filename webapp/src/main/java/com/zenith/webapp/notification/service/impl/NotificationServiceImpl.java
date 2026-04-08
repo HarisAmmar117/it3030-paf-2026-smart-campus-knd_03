@@ -1,6 +1,7 @@
 package com.zenith.webapp.notification.service.impl;
 
 import com.zenith.webapp.notification.dto.request.CreateNotificationRequest;
+import com.zenith.webapp.notification.dto.request.UpdateNotificationRequest;
 import com.zenith.webapp.notification.dto.response.NotificationResponse;
 import com.zenith.webapp.notification.model.Notification;
 import com.zenith.webapp.notification.repository.NotificationRepository;
@@ -46,6 +47,16 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<NotificationResponse> getAllNotifications() {
+        return notificationRepository.findAll()
+                .stream()
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public long getUnreadCount(Long recipientId) {
         return notificationRepository.countByRecipientIdAndIsReadFalse(recipientId);
     }
@@ -76,6 +87,16 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public NotificationResponse updateNotification(Long notificationId, UpdateNotificationRequest request) {
+        Notification notification = getOrThrow(notificationId);
+        notification.setType(request.getType());
+        notification.setMessage(request.getMessage());
+        notification.setReferenceId(request.getReferenceId());
+        Notification updated = notificationRepository.save(notification);
+        return toResponse(updated);
+    }
+
+    @Override
     public void deleteNotification(Long notificationId, Long actorUserId) {
         Notification notification = getOrThrow(notificationId);
 
@@ -86,7 +107,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.delete(notification);
     }
 
-    // ── Private helpers ──────────────────────────────────────────────────────
+    // ── Private helpers ───────────────────────────────────────────────────
 
     private Notification getOrThrow(Long id) {
         return notificationRepository.findById(id)

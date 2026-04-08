@@ -1,6 +1,7 @@
 package com.zenith.webapp.notification.controller;
 
 import com.zenith.webapp.notification.dto.request.CreateNotificationRequest;
+import com.zenith.webapp.notification.dto.request.UpdateNotificationRequest;
 import com.zenith.webapp.notification.dto.response.NotificationResponse;
 import com.zenith.webapp.notification.service.NotificationService;
 import jakarta.validation.Valid;
@@ -24,23 +25,34 @@ public class NotificationController {
     @PostMapping
     public ResponseEntity<NotificationResponse> createNotification(
             @Valid @RequestBody CreateNotificationRequest request) {
-        NotificationResponse response = notificationService.createNotification(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(notificationService.createNotification(request));
     }
 
-    // READ — GET /api/notifications?recipientId=1
+    // READ — GET /api/notifications → all notifications (no param)
+    // READ — GET /api/notifications?recipientId=1 → one user's notifications
     @GetMapping
     public ResponseEntity<List<NotificationResponse>> getNotifications(
-            @RequestParam Long recipientId) {
-        return ResponseEntity.ok(notificationService.getNotificationsForUser(recipientId));
+            @RequestParam(required = false) Long recipientId) {
+        if (recipientId != null) {
+            return ResponseEntity.ok(notificationService.getNotificationsForUser(recipientId));
+        }
+        return ResponseEntity.ok(notificationService.getAllNotifications());
     }
 
     // READ — GET /api/notifications/unread-count?recipientId=1
     @GetMapping("/unread-count")
     public ResponseEntity<Map<String, Long>> getUnreadCount(
             @RequestParam Long recipientId) {
-        long count = notificationService.getUnreadCount(recipientId);
-        return ResponseEntity.ok(Map.of("unreadCount", count));
+        return ResponseEntity.ok(Map.of("unreadCount", notificationService.getUnreadCount(recipientId)));
+    }
+
+    // UPDATE — PUT /api/notifications/{id} (edit type/message)
+    @PutMapping("/{id}")
+    public ResponseEntity<NotificationResponse> updateNotification(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateNotificationRequest request) {
+        return ResponseEntity.ok(notificationService.updateNotification(id, request));
     }
 
     // UPDATE — PATCH /api/notifications/{id}/read

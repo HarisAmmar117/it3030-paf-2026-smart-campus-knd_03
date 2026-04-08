@@ -6,7 +6,7 @@ const MODULE_LINKS = [
   { to: "/tickets", label: "🎫 Tickets", active: true },
   { to: "/facilities", label: "🏢 Facilities", active: false },
   { to: "/bookings", label: "📅 Bookings", active: false },
-  { to: "/notifications", label: "🔔 Notifications", active: false },
+  { to: "/notifications", label: "🔔 Notifications", active: true },
 ];
 
 export default function Navbar() {
