@@ -279,3 +279,60 @@ export function getAttachmentImageUrl(filePath) {
   // filePath from backend is like "uploads/tickets/1/uuid_name.jpg"
   return `${BASE_URL}/${filePath.replace(/\\\\/g, "/")}`;
 }
+
+// ========================
+// ADMIN ENDPOINTS
+// ========================
+
+export async function assignTicket(ticketId, assigneeId, userId = 1, role = "ADMIN") {
+  const response = await fetch(`${BASE_URL}/api/tickets/${ticketId}/assign`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "X-User-Id": String(userId),
+      "X-User-Role": role,
+    },
+    body: JSON.stringify({ assigneeId }),
+  });
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to assign ticket";
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function updateTicketStatus(
+  ticketId,
+  payload,
+  userId = 1,
+  role = "ADMIN"
+) {
+  const response = await fetch(`${BASE_URL}/api/tickets/${ticketId}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "X-User-Id": String(userId),
+      "X-User-Role": role,
+    },
+    body: JSON.stringify(payload),
+  });
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to update status";
+    throw new Error(message);
+  }
+  return data;
+}

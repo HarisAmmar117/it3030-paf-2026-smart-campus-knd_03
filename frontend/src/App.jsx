@@ -10,6 +10,7 @@ import Navbar from "./components/common/Navbar";
 import TicketLayout from "./pages/ticket/TicketLayout";
 import TicketCreatePage from "./pages/ticket/TicketCreatePage";
 import TicketListPage from "./pages/ticket/TicketListPage";
+import AdminTicketPage from "./pages/ticket/AdminTicketPage";
 
 // ========================
 // MEMBER 1 — Facility Pages
@@ -48,7 +49,7 @@ function App() {
           <Route path="/tickets" element={<TicketLayout />}>
             <Route index element={<TicketListPage />} />
             <Route path="create" element={<TicketCreatePage />} />
-            {/* <Route path=":id" element={<TicketDetailPage />} /> */}
+            <Route path="admin" element={<AdminTicketPage />} />
           </Route>
 
           {/* ====== MEMBER 1 — Facilities ====== */}

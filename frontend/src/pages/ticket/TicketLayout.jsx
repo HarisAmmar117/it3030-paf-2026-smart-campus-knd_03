@@ -2,8 +2,9 @@ import { NavLink, Outlet } from "react-router-dom";
 import "./TicketLayout.css";
 
 const TICKET_TABS = [
-  { to: "/tickets", label: "View Tickets", end: true },
-  { to: "/tickets/create", label: "Create Ticket", end: false },
+  { to: "/tickets", label: "📋 View Tickets", end: true },
+  { to: "/tickets/create", label: "➕ Create Ticket", end: false },
+  { to: "/tickets/admin", label: "🛡️ Admin Panel", end: false },
 ];
 
 export default function TicketLayout() {
