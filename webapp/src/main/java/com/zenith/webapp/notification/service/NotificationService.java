@@ -1,27 +1,34 @@
 package com.zenith.webapp.notification.service;
 
 import com.zenith.webapp.notification.dto.request.CreateNotificationRequest;
+import com.zenith.webapp.notification.dto.request.UpdateNotificationRequest;
 import com.zenith.webapp.notification.dto.response.NotificationResponse;
 
 import java.util.List;
 
 public interface NotificationService {
 
-    // CREATE — send a new notification
+    // CREATE
     NotificationResponse createNotification(CreateNotificationRequest request);
 
-    // READ — get all notifications for a user
+    // READ — all notifications for one user
     List<NotificationResponse> getNotificationsForUser(Long recipientId);
 
-    // READ — get unread count for a user
+    // READ — ALL notifications (admin view)
+    List<NotificationResponse> getAllNotifications();
+
+    // READ — unread count for a user
     long getUnreadCount(Long recipientId);
 
-    // UPDATE — mark a single notification as read
+    // UPDATE — mark one as read
     NotificationResponse markAsRead(Long notificationId, Long actorUserId);
 
-    // UPDATE — mark ALL notifications as read for a user
+    // UPDATE — mark all as read
     void markAllAsRead(Long recipientId);
 
-    // DELETE — delete a single notification
+    // UPDATE — edit message/type of a notification
+    NotificationResponse updateNotification(Long notificationId, UpdateNotificationRequest request);
+
+    // DELETE
     void deleteNotification(Long notificationId, Long actorUserId);
 }

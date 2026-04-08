@@ -32,8 +32,8 @@ import BookingCreatePage from "./pages/booking/BookingCreatePage";
 // MEMBER 4 — Notification & Auth Pages
 // (Uncomment when Member 4 creates their pages)
 // ========================
-// import NotificationLayout from "./pages/notification/NotificationLayout";
-// import NotificationListPage from "./pages/notification/NotificationListPage";
+import NotificationLayout from "./pages/notification/NotificationLayout";
+import NotificationListPage from "./pages/notification/NotificationListPage";
 // import LoginPage from "./pages/auth/LoginPage";
 
 function App() {
@@ -66,9 +66,9 @@ function App() {
           </Route>
 
           {/* ====== MEMBER 4 — Notifications & Auth ====== */}
-          {/* <Route path="/notifications" element={<NotificationLayout />}> */}
-          {/*   <Route index element={<NotificationListPage />} /> */}
-          {/* </Route> */}
+          <Route path="/notifications" element={<NotificationLayout />}>
+            <Route index element={<NotificationListPage />} />
+          </Route>
           {/* <Route path="/login" element={<LoginPage />} /> */}
         </Routes>
       </main>
