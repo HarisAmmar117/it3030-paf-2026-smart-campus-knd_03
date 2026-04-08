@@ -10,6 +10,7 @@ import Navbar from "./components/common/Navbar";
 import TicketLayout from "./pages/ticket/TicketLayout";
 import TicketCreatePage from "./pages/ticket/TicketCreatePage";
 import TicketListPage from "./pages/ticket/TicketListPage";
+import AdminTicketPage from "./pages/ticket/AdminTicketPage";
 
 // ========================
 // MEMBER 1 — Facility Pages
@@ -31,8 +32,8 @@ import BookingCreatePage from "./pages/booking/BookingCreatePage";
 // MEMBER 4 — Notification & Auth Pages
 // (Uncomment when Member 4 creates their pages)
 // ========================
-// import NotificationLayout from "./pages/notification/NotificationLayout";
-// import NotificationListPage from "./pages/notification/NotificationListPage";
+import NotificationLayout from "./pages/notification/NotificationLayout";
+import NotificationListPage from "./pages/notification/NotificationListPage";
 // import LoginPage from "./pages/auth/LoginPage";
 
 function App() {
@@ -48,7 +49,7 @@ function App() {
           <Route path="/tickets" element={<TicketLayout />}>
             <Route index element={<TicketListPage />} />
             <Route path="create" element={<TicketCreatePage />} />
-            {/* <Route path=":id" element={<TicketDetailPage />} /> */}
+            <Route path="admin" element={<AdminTicketPage />} />
           </Route>
 
           {/* ====== MEMBER 1 — Facilities ====== */}
@@ -64,9 +65,9 @@ function App() {
           </Route>
 
           {/* ====== MEMBER 4 — Notifications & Auth ====== */}
-          {/* <Route path="/notifications" element={<NotificationLayout />}> */}
-          {/*   <Route index element={<NotificationListPage />} /> */}
-          {/* </Route> */}
+          <Route path="/notifications" element={<NotificationLayout />}>
+            <Route index element={<NotificationListPage />} />
+          </Route>
           {/* <Route path="/login" element={<LoginPage />} /> */}
         </Routes>
       </main>
