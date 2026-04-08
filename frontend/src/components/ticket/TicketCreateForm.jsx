@@ -32,14 +32,34 @@ export default function TicketCreateForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [contactError, setContactError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Validate contact: email OR +94 followed by exactly 9 digits
+  const validateContact = (value) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\+94\d{9}$/;
+    if (emailRegex.test(value) || phoneRegex.test(value.replace(/\s/g, ""))) {
+      return "";
+    }
+    return "Enter a valid email (e.g. john@campus.edu) or phone (+94XXXXXXXXX)";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate contact before submitting
+    const contactErr = validateContact(form.preferredContactDetails);
+    if (contactErr) {
+      setContactError(contactErr);
+      return;
+    }
+    setContactError("");
+
     setLoading(true);
     setError("");
     setSuccess("");
@@ -213,25 +233,18 @@ export default function TicketCreateForm() {
             />
           </div>
 
-          {/* Contact */}
-          <div className="form-group">
-            <label htmlFor="preferredContactDetails">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                <polyline points="22,6 12,13 2,6"/>
-              </svg>
-              Contact Details
-            </label>
-            <input
-              id="preferredContactDetails"
-              name="preferredContactDetails"
-              type="text"
-              placeholder="e.g., john@campus.edu or +94 77 123 4567"
-              value={form.preferredContactDetails}
-              onChange={handleChange}
-              required
-            />
-          </div>
+        {/* Contact */}
+        <div className="form-group">
+          <label htmlFor="preferredContactDetails">Contact Details</label>
+          <input
+            id="preferredContactDetails"
+            name="preferredContactDetails"
+            placeholder="e.g. john@campus.edu or +94 77 123 4567"
+            value={form.preferredContactDetails}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
           {/* Submit */}
           <button type="submit" className="submit-btn" disabled={loading}>

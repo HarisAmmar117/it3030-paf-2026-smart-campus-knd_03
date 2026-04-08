@@ -30,6 +30,17 @@ const TICKET_TABS = [
       </svg>
     )
   },
+  {
+    to: "/tickets/admin",
+    label: "Admin Panel",
+    end: false,
+    icon: () => (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <path d="M12 2l7 4v6c0 5-3.5 8.7-7 10-3.5-1.3-7-5-7-10V6l7-4z" />
+        <path d="M9.5 12.5l1.8 1.8 3.2-3.6" />
+      </svg>
+    )
+  },
 ];
 
 export default function TicketLayout() {
