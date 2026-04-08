@@ -175,3 +175,14 @@
   margin: 0 32px;
   margin-top: 24px;
 }
+
+/* ========== FIELD ERRORS ========== */
+.field-error {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #dc2626;
+  animation: alertSlideIn 0.2s ease-out;
+}
+

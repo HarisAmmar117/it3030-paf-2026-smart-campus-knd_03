@@ -25,9 +25,22 @@ export default function TicketList() {
   const [editTicketId, setEditTicketId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [editContactError, setEditContactError] = useState("");
   const [openComments, setOpenComments] = useState({});
   const [openAttachments, setOpenAttachments] = useState({});
   const currentUserId = 101;
+
+  const validateContact = (value) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\+94\d{9}$/;
+    const normalized = String(value || "").replace(/\s/g, "");
+
+    if (emailRegex.test(value) || phoneRegex.test(normalized)) {
+      return "";
+    }
+
+    return "Enter a valid email (e.g. john@campus.edu) or phone (+94XXXXXXXXX)";
+  };
 
   const toggleComments = (ticketId) => {
     setOpenComments((prev) => ({ ...prev, [ticketId]: !prev[ticketId] }));
@@ -82,6 +95,13 @@ export default function TicketList() {
     e.preventDefault();
     if (!editTicketId || !editForm) return;
 
+    const contactErr = validateContact(editForm.preferredContactDetails);
+    if (contactErr) {
+      setEditContactError(contactErr);
+      return;
+    }
+    setEditContactError("");
+
     setSavingEdit(true);
     setError("");
     try {
@@ -99,6 +119,7 @@ export default function TicketList() {
   const onCancelUpdate = () => {
     setEditTicketId(null);
     setEditForm(null);
+    setEditContactError("");
   };
 
   const onDeleteTicket = async (ticketId) => {
@@ -282,9 +303,15 @@ export default function TicketList() {
                       id={`contact-${t.id}`}
                       name="preferredContactDetails"
                       value={editForm.preferredContactDetails}
-                      onChange={onEditChange}
+                      onChange={(e) => {
+                        onEditChange(e);
+                        if (editContactError) setEditContactError("");
+                      }}
                       required
                     />
+                    {editContactError && (
+                      <span className="field-error">{editContactError}</span>
+                    )}
                   </div>
 
                   <div className="form-group">

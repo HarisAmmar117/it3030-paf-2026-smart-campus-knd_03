@@ -142,6 +142,12 @@
   font-size: 0.85rem;
 }
 
+.ticket-edit-form .field-error {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+
 .ticket-edit-actions {
   margin-top: 10px;
   display: flex;
