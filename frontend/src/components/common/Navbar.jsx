@@ -1,12 +1,11 @@
 import { NavLink } from "react-router-dom";
 import "./Navbar.css";
 
-// Top-level module links — each member's section
 const MODULE_LINKS = [
-  { to: "/tickets", label: "🎫 Tickets", active: true },
-  { to: "/facilities", label: "🏢 Facilities", active: true },
-  { to: "/bookings", label: "📅 Bookings", active: false },
-  { to: "/notifications", label: "🔔 Notifications", active: false },
+  { to: "/tickets", label: "🎫 Tickets" },
+  { to: "/facilities", label: "🏢 Facilities" },
+  { to: "/bookings", label: "📅 Bookings" },
+  { to: "/notifications", label: "🔔 Notifications" },
 ];
 
 export default function Navbar() {
@@ -21,23 +20,17 @@ export default function Navbar() {
 
         {/* Module Navigation */}
         <div className="navbar-links">
-          {MODULE_LINKS.map((item) =>
-            item.active ? (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) =>
-                  `navbar-link ${isActive ? "navbar-link-active" : ""}`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ) : (
-              <span key={item.to} className="navbar-link navbar-link-disabled">
-                {item.label}
-              </span>
-            )
-          )}
+          {MODULE_LINKS.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `navbar-link ${isActive ? "navbar-link-active" : ""}`
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
         </div>
       </div>
     </nav>

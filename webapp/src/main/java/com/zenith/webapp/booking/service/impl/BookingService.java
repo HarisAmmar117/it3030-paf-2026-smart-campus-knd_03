@@ -1,7 +1,7 @@
 package com.zenith.webapp.booking.service.impl;
 
 import com.zenith.webapp.booking.dto.request.BookingRequest;
-
+import com.zenith.webapp.booking.dto.request.UpdateBookingRequest;
 import com.zenith.webapp.booking.dto.response.BookingResponse;
 import com.zenith.webapp.booking.enums.BookingStatus;
 import com.zenith.webapp.booking.model.Booking;
@@ -11,7 +11,9 @@ import com.zenith.webapp.facility.repository.ResourceRepository;
 import com.zenith.webapp.auth.model.User;
 import com.zenith.webapp.auth.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,7 +73,7 @@ public class BookingService {
 
     // ------------------ UPDATE BOOKING ------------------
     @Transactional
-    public BookingResponse updateBooking(Long bookingId, BookingRequest request) {
+    public BookingResponse updateBooking(Long bookingId, UpdateBookingRequest request) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
@@ -81,6 +83,7 @@ public class BookingService {
         booking.setResource(resource);
         booking.setStartTime(request.getStartTime());
         booking.setEndTime(request.getEndTime());
+        booking.setStatus(request.getStatus());
         booking.setPurpose(request.getPurpose());
         booking.setAttendees(request.getAttendees());
 
@@ -96,6 +99,8 @@ public class BookingService {
 
         bookingRepository.delete(booking);
     }
+
+    
 
     // ------------------ UPDATE STATUS ------------------
     @Transactional
@@ -130,4 +135,43 @@ public class BookingService {
         response.setStatus(booking.getStatus().name());
         return response;
     }
+
+
+
+
+        // Convert directly without fromBooking
+public List<BookingResponse> getBookingsByUser(Long userId, String status, String resource) {
+        List<Booking> bookings = bookingRepository.findBookingsByUserId(userId);
+
+        if (status != null && !status.isEmpty()) {
+                bookings = bookings.stream()
+                        .filter(b -> b.getStatus().name().equalsIgnoreCase(status))
+                        .collect(Collectors.toList());
+        }
+
+        if (resource != null && !resource.isEmpty()) {
+                bookings = bookings.stream()
+                        .filter(b -> b.getResource().getName().equalsIgnoreCase(resource))
+                        .collect(Collectors.toList());
+        }
+
+    List<BookingResponse> responses = new ArrayList<>();
+        for (Booking b : bookings) {
+                BookingResponse r = new BookingResponse();
+                r.setBookingId(b.getBooking_id());
+                r.setUserId(b.getUser().getUser_id());
+                r.setUserName(b.getUser().getName());
+                r.setResourceId(b.getResource().getId());
+                r.setResourceName(b.getResource().getName());
+                r.setStartTime(b.getStartTime());
+                r.setEndTime(b.getEndTime());
+                r.setPurpose(b.getPurpose());
+                r.setAttendees(b.getAttendees());
+                r.setStatus(b.getStatus().name());
+
+                responses.add(r);
+        }
+
+        return responses;
+        }
 }

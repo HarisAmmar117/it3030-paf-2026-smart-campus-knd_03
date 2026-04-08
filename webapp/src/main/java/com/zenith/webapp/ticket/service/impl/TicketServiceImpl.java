@@ -201,6 +201,15 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<TicketAttachmentResponse> getAttachments(Long ticketId) {
+        getTicketOrThrow(ticketId);
+        return attachmentRepository.findByTicketId(ticketId).stream()
+                .map(this::toAttachmentResponse)
+                .toList();
+    }
+
+    @Override
     public TicketCommentResponse addComment(Long ticketId, CreateCommentRequest request, Long actorUserId) {
         Ticket ticket = getTicketOrThrow(ticketId);
 

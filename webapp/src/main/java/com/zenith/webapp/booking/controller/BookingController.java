@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.zenith.webapp.booking.dto.request.BookingRequest;
 import com.zenith.webapp.booking.dto.request.BookingStatusRequest;
+import com.zenith.webapp.booking.dto.request.UpdateBookingRequest;
 import com.zenith.webapp.booking.dto.response.BookingResponse;
 import com.zenith.webapp.booking.service.impl.BookingService;
 
@@ -46,7 +47,7 @@ public class BookingController {
     @PutMapping("/{id}")
     public ResponseEntity<BookingResponse> updateBooking(
             @PathVariable Long id,
-            @RequestBody BookingRequest request) {
+            @RequestBody UpdateBookingRequest request) {
         return ResponseEntity.ok(bookingService.updateBooking(id, request));
     }
 
@@ -70,8 +71,12 @@ public class BookingController {
     //USER specific bookings
     @GetMapping("/my")
     public ResponseEntity<List<BookingResponse>> getMyBookings(
-            @RequestHeader("userId") Long userId) {
+            @RequestHeader("userId") Long userId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String resource) {
 
-        return ResponseEntity.ok(bookingService.getBookingsByUser(userId));
+        return ResponseEntity.ok(
+            bookingService.getBookingsByUser(userId, status, resource)
+        );
     }
 }

@@ -31,6 +31,8 @@ public interface TicketService {
 
     void deleteAttachment(Long ticketId, Long attachmentId);
 
+    List<TicketAttachmentResponse> getAttachments(Long ticketId);
+
     TicketCommentResponse addComment(Long ticketId, CreateCommentRequest request, Long actorUserId);
 
     TicketCommentResponse updateComment(Long ticketId, Long commentId, UpdateCommentRequest request, Long actorUserId, String actorRole);
