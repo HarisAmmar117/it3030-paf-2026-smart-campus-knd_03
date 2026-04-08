@@ -588,3 +588,69 @@
   stroke: currentColor;
   stroke-width: 2;
 }
+
+/* Add to Navbar.css - Logo image styling */
+.brand-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+/* Fix for theme toggle button - ensure SVG displays properly */
+.theme-toggle-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 38px;
+  background: var(--accent-light);
+  border: 1px solid var(--accent-border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  color: var(--accent);
+  padding: 0;
+}
+
+.theme-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2;
+  display: block;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: scale(1.05);
+  border-color: var(--accent);
+}
+
+/* Ensure brand icon container handles images properly */
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  overflow: hidden;
+}
+
+/* Mobile brand icon */
+.mobile-brand .brand-icon {
+  width: 48px;
+  height: 48px;
+}
+
+/* Ensure SVG icons in nav links display properly */
+.nav-icon svg,
+.mobile-nav-icon svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}

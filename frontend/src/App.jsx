@@ -10,7 +10,7 @@ import Navbar from "./components/common/Navbar";
 import TicketLayout from "./pages/ticket/TicketLayout";
 import TicketCreatePage from "./pages/ticket/TicketCreatePage";
 import TicketListPage from "./pages/ticket/TicketListPage";
-import AdminTicketPage from "./pages/ticket/AdminTicketPage";
+// import AdminTicketPage from "./pages/ticket/AdminTicketPage";
 
 // ========================
 // MEMBER 1 — Facility Pages
@@ -22,7 +22,6 @@ import FacilityEditPage from "./pages/facility/FacilityEditPage";
 
 // ========================
 // MEMBER 2 — Booking Pages
-// (Uncomment when Member 2 creates their pages)
 // ========================
 import BookingLayout from "./pages/booking/BookingLayout";
 import BookingListPage from "./pages/booking/BookingListPage";
@@ -30,10 +29,19 @@ import BookingCreatePage from "./pages/booking/BookingCreatePage";
 
 // ========================
 // MEMBER 4 — Notification & Auth Pages
-// (Uncomment when Member 4 creates their pages)
 // ========================
 import NotificationLayout from "./pages/notification/NotificationLayout";
 import NotificationListPage from "./pages/notification/NotificationListPage";
+
+// ========================
+// PUBLIC PAGES
+// ========================
+import HomePage from "./pages/HomePage";
+import AboutUs from "./pages/AboutUs";
+
+// ========================
+// AUTH PAGES (to be implemented)
+// ========================
 // import LoginPage from "./pages/auth/LoginPage";
 
 function App() {
@@ -42,14 +50,15 @@ function App() {
       <Navbar />
       <main className="app-main">
         <Routes>
-          {/* Default redirect */}
-          <Route path="/" element={<Navigate to="/tickets" replace />} />
+          {/* Public Routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutUs />} />
 
           {/* ====== MEMBER 3 — Tickets ====== */}
           <Route path="/tickets" element={<TicketLayout />}>
             <Route index element={<TicketListPage />} />
             <Route path="create" element={<TicketCreatePage />} />
-            {/* <Route path=":id" element={<TicketDetailPage />} /> */}
+            {/* <Route path="admin" element={<AdminTicketPage />} /> */}
           </Route>
 
           {/* ====== MEMBER 1 — Facilities ====== */}
@@ -69,7 +78,12 @@ function App() {
           <Route path="/notifications" element={<NotificationLayout />}>
             <Route index element={<NotificationListPage />} />
           </Route>
+
+          {/* Auth Route (to be implemented) */}
           {/* <Route path="/login" element={<LoginPage />} /> */}
+
+          {/* 404 Catch-all */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </div>

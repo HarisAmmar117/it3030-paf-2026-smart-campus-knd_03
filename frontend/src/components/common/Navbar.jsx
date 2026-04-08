@@ -1,8 +1,20 @@
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "./Navbar.css";
+import logo from "../../../public/zenith-logo.png";
 
 const MODULE_LINKS = [
+  { 
+    to: "/", 
+    label: "Home", 
+    icon: (active) => (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+      </svg>
+    ),
+    end: true
+  },
   { 
     to: "/tickets", 
     label: "Tickets", 
@@ -46,6 +58,16 @@ const MODULE_LINKS = [
       </svg>
     )
   },
+  { 
+    to: "/about", 
+    label: "About", 
+    icon: (active) => (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 16v-4M12 8h.01" />
+      </svg>
+    )
+  },
 ];
 
 export default function Navbar() {
@@ -80,14 +102,11 @@ export default function Navbar() {
           {/* Logo / Brand */}
           <NavLink to="/" className="navbar-brand" onClick={closeMobileMenu}>
             <div className="brand-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
+              <img src={logo} alt="Zenith Logo" className="brand-logo-img" />
             </div>
             <div className="brand-text">
-              <span className="brand-title">CampusHub</span>
-              <span className="brand-subtitle">Resource Management</span>
+              <span className="brand-title">Zenith</span>
+              <span className="brand-subtitle">Smart Campus Operations</span>
             </div>
           </NavLink>
 
@@ -97,6 +116,7 @@ export default function Navbar() {
               <NavLink
                 key={item.to}
                 to={item.to}
+                end={item.end}
                 className={({ isActive }) =>
                   `nav-link ${isActive ? "nav-link-active" : ""}`
                 }
@@ -161,14 +181,11 @@ export default function Navbar() {
           <div className="mobile-menu-header">
             <div className="mobile-brand">
               <div className="brand-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
+                <img src={logo} alt="Zenith Logo" className="brand-logo-img" />
               </div>
               <div>
-                <div className="mobile-brand-title">CampusHub</div>
-                <div className="mobile-brand-subtitle">Resource Management</div>
+                <div className="mobile-brand-title">Zenith</div>
+                <div className="mobile-brand-subtitle">Smart Campus Operations</div>
               </div>
             </div>
           </div>
@@ -177,6 +194,7 @@ export default function Navbar() {
               <NavLink
                 key={item.to}
                 to={item.to}
+                end={item.end}
                 className={({ isActive }) =>
                   `mobile-nav-link ${isActive ? "mobile-nav-link-active" : ""}`
                 }
