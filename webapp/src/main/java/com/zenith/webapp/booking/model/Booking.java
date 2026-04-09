@@ -30,7 +30,6 @@ public class Booking {
     private Resource resource;
 
 
-    @CreationTimestamp
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   getBookings,
   updateBooking,
+  updateBookingStatus,
   deleteBooking,
   getAllResources,
 } from "../../api/BookingApi";
@@ -22,9 +23,11 @@ export default function BookingList() {
   const [loading, setLoading] = useState(false);
   const [loadingResources, setLoadingResources] = useState(true);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [editBookingId, setEditBookingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [actionLoading, setActionLoading] = useState(null);
   const [isDark, setIsDark] = useState(() => {
     return localStorage.getItem("theme") === "dark" || 
       (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
@@ -82,6 +85,14 @@ export default function BookingList() {
     setFilteredBookings(filtered);
   }, [statusFilter, resourceFilter, bookings]);
 
+  // Auto-dismiss success message
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
   const onStartUpdate = (booking) => {
     setEditBookingId(booking.bookingId);
     setEditForm({
@@ -105,6 +116,7 @@ export default function BookingList() {
     setError("");
     try {
       await updateBooking(editBookingId, editForm);
+      setSuccess("Booking updated successfully!");
       setEditBookingId(null);
       setEditForm(null);
       await loadBookings();
@@ -125,9 +137,46 @@ export default function BookingList() {
     if (!confirmed) return;
     try {
       await deleteBooking(bookingId);
+      setSuccess("Booking deleted successfully!");
       await loadBookings();
     } catch (err) {
       setError(err.message || "Unable to delete booking");
+    }
+  };
+
+  // Approve Booking Handler
+  const onApproveBooking = async (bookingId) => {
+    const confirmed = window.confirm("Approve this booking?");
+    if (!confirmed) return;
+    
+    setActionLoading(bookingId);
+    setError("");
+    try {
+      await updateBookingStatus(bookingId, "APPROVED");
+      setSuccess("Booking approved successfully!");
+      await loadBookings();
+    } catch (err) {
+      setError(err.message || "Unable to approve booking");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // Reject Booking Handler with reason
+  const onRejectBooking = async (bookingId) => {
+    const reason = window.prompt("Please provide a reason for rejection:");
+    if (reason === null) return; // User cancelled
+    
+    setActionLoading(bookingId);
+    setError("");
+    try {
+      await updateBookingStatus(bookingId, "REJECTED", reason);
+      setSuccess("Booking rejected successfully!");
+      await loadBookings();
+    } catch (err) {
+      setError(err.message || "Unable to reject booking");
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -141,6 +190,8 @@ export default function BookingList() {
   return (
     <div className="booking-list-container">
       <div className="booking-list-card">
+        {/* Theme Toggle */}
+
 
         {/* Header */}
         <div className="list-header">
@@ -207,6 +258,16 @@ export default function BookingList() {
           )}
         </div>
 
+        {/* Success & Error Alerts */}
+        {success && (
+          <div className="alert alert-success">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            {success}
+          </div>
+        )}
         {error && (
           <div className="alert alert-error">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -266,6 +327,48 @@ export default function BookingList() {
                       <span className={statusClass(b.status)}>{b.status}</span>
                     </td>
                     <td className="actions-cell">
+                      {/* Approve Button - Only for PENDING bookings */}
+                      {b.status === "PENDING" && (
+                        <button 
+                          className="action-btn approve" 
+                          onClick={() => onApproveBooking(b.bookingId)}
+                          disabled={actionLoading === b.bookingId}
+                        >
+                          {actionLoading === b.bookingId ? (
+                            <span className="spinner-small"></span>
+                          ) : (
+                            <>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                              Approve
+                            </>
+                          )}
+                        </button>
+                      )}
+                      
+                      {/* Reject Button - Only for PENDING bookings */}
+                      {b.status === "PENDING" && (
+                        <button 
+                          className="action-btn reject" 
+                          onClick={() => onRejectBooking(b.bookingId)}
+                          disabled={actionLoading === b.bookingId}
+                        >
+                          {actionLoading === b.bookingId ? (
+                            <span className="spinner-small"></span>
+                          ) : (
+                            <>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                              </svg>
+                              Reject
+                            </>
+                          )}
+                        </button>
+                      )}
+                      
+                      {/* Edit Button */}
                       <button className="action-btn edit" onClick={() => onStartUpdate(b)}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M17 3l4 4-7 7H10v-4l7-7z" />
@@ -273,6 +376,8 @@ export default function BookingList() {
                         </svg>
                         Edit
                       </button>
+                      
+                      {/* Delete Button */}
                       <button className="action-btn delete" onClick={() => onDeleteBooking(b.bookingId)}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M4 7h16M10 11v6M14 11v6M5 7l1 13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-13" />

@@ -128,12 +128,11 @@ export async function updateBooking(bookingId, payload, userId = 2) {
   return data;
 }
 
-// UPDATE BOOKING STATUS (IMPORTANT)
-export async function updateBookingStatus(
-  bookingId,
-  status,
-  userId = 2
-) {
+
+// UPDATE BOOKING STATUS (APPROVE/REJECT)
+export async function updateBookingStatus(bookingId, status, rejectionReason = null) {
+  const payload = rejectionReason ? { status, rejectionReason } : { status };
+  
   const response = await fetch(
     `${BASE_URL}/api/bookings/${bookingId}/status`,
     {
@@ -141,27 +140,14 @@ export async function updateBookingStatus(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(payload),
     }
   );
-
-  let data = null;
-  try {
-    data = await response.json();
-  } catch {
-    data = null;
-  }
-
-  if (!response.ok) {
-    const message =
-      (data && (data.error || data.message)) ||
-      "Failed to update booking status";
-    throw new Error(message);
-  }
-
+  
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error((data && data.message) || "Failed to update booking status");
   return data;
 }
-
 // DELETE BOOKING
 export async function deleteBooking(bookingId) {
   const response = await fetch(`${BASE_URL}/api/bookings/${bookingId}`, {
