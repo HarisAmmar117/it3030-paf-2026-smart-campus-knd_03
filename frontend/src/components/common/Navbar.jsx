@@ -38,6 +38,20 @@ const MODULE_LINKS = [
       </svg>
     )
   },
+  // Add this to MODULE_LINKS array in Navbar.jsx after the Bookings link
+{ 
+  to: "/bookings/my-bookings", 
+  label: "My Bookings", 
+  icon: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+      <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
+    </svg>
+  )
+},
   { 
     to: "/bookings", 
     label: "Bookings", 
@@ -197,6 +211,15 @@ export default function Navbar() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("role");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userEmail");
+    window.location.href = "/login";
+  };
+
   const visibleLinks = MODULE_LINKS.filter((item) => {
     if (item.to === "/" || item.to === "/about") return true;
     if (!isLoggedIn) return false;
@@ -243,7 +266,6 @@ export default function Navbar() {
             {/* Theme Toggle with Sun/Moon Icons */}
             <button onClick={toggleTheme} className="theme-toggle-btn" aria-label="Toggle theme">
               {isDark ? (
-                /* Sun icon for dark mode (click to switch to light) */
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="5" />
                   <line x1="12" y1="1" x2="12" y2="3" />
@@ -254,13 +276,13 @@ export default function Navbar() {
                   <line x1="21" y1="12" x2="23" y2="12" />
                 </svg>
               ) : (
-                /* Moon icon for light mode (click to switch to dark) */
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                 </svg>
               )}
             </button>
 
+            {/* Notification Bell */}
             {isLoggedIn && (
               <div className="notification-wrapper" ref={notificationRef}>
                 <button onClick={toggleNotification} className="notification-btn" aria-label="Notifications">
@@ -319,39 +341,37 @@ export default function Navbar() {
               </div>
             )}
 
+            {/* User Name Chip */}
+            {isLoggedIn && (
+              <div className="user-name-chip" title={userEmail || role}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                <span>{userName}</span>
+              </div>
+            )}
+
+            {/* Login/Logout Button */}
             {isLoggedIn ? (
-              <button
-                className="theme-toggle-btn"
-                onClick={() => {
-                  localStorage.removeItem("token");
-                  localStorage.removeItem("userId");
-                  localStorage.removeItem("role");
-                  localStorage.removeItem("userName");
-                  localStorage.removeItem("userEmail");
-                  window.location.href = "/login";
-                }}
-                title={`Logout (${role})`}
-              >
+              <button onClick={handleLogout} className="logout-btn" title={`Logout (${role})`}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
                 Logout
               </button>
             ) : (
-              <NavLink to="/login" className="theme-toggle-btn" title="Login">
+              <NavLink to="/login" className="login-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                  <polyline points="10 17 15 12 10 7" />
+                  <line x1="15" y1="12" x2="3" y2="12" />
+                </svg>
                 Login
               </NavLink>
             )}
-
-            {/* Logged-in User Name */}
-            <div className="user-name-chip" title={userName}>
-              {isLoggedIn ? userName : "Guest"}
-            </div>
-
-            {/* User Avatar */}
-            <div className="user-avatar">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </div>
 
             {/* Mobile Menu Button */}
             <button 
@@ -415,6 +435,18 @@ export default function Navbar() {
                 </div>
               </div>
             </div>
+            {!isLoggedIn && (
+              <div className="mobile-login-section">
+                <NavLink to="/login" className="mobile-login-btn" onClick={closeMobileMenu}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <polyline points="10 17 15 12 10 7" />
+                    <line x1="15" y1="12" x2="3" y2="12" />
+                  </svg>
+                  Sign In
+                </NavLink>
+              </div>
+            )}
           </div>
         </div>
       </div>

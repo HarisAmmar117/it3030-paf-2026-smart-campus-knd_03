@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import "./App.css";
 import { hasTicketAdminAccess, isUserRole } from "./utils/authSession";
 import { useLocation } from "react-router-dom";
+
 // Shared layout
 import Navbar from "./components/common/Navbar";
 
@@ -28,6 +29,7 @@ import FacilityEditPage from "./pages/facility/FacilityEditPage";
 import BookingLayout from "./pages/booking/BookingLayout";
 import BookingListPage from "./pages/booking/BookingListPage";
 import BookingCreatePage from "./pages/booking/BookingCreatePage";
+import UserBookingsPage from "./pages/booking/UserBookingsPage";
 
 // ========================
 // MEMBER 4 — Notification & Auth Pages
@@ -42,7 +44,7 @@ import HomePage from "./pages/HomePage";
 import AboutUs from "./pages/AboutUs";
 
 // ========================
-// AUTH PAGES (to be implemented)
+// AUTH PAGES
 // ========================
 import LoginPage from "./pages/auth/LoginPage";
 
@@ -94,13 +96,13 @@ function App() {
 
           {/* ====== MEMBER 3 — Tickets ====== */}
           <Route
-              path="/tickets"
-              element={
-                <RequireAuth>
-                  <TicketLayout />
-                </RequireAuth>
-              }
-            >
+            path="/tickets"
+            element={
+              <RequireAuth>
+                <TicketLayout />
+              </RequireAuth>
+            }
+          >
             <Route
               index
               element={
@@ -117,44 +119,79 @@ function App() {
                 </RequireUser>
               }
             />
-            <Route path="admin" element={
+            <Route 
+              path="admin" 
+              element={
                 <RequireAdmin>
                   <AdminTicketPage />
                 </RequireAdmin>
-              } />
-            {/* <Route path=":id" element={<TicketDetailPage />} /> */}
+              } 
+            />
           </Route>
 
           {/* ====== MEMBER 1 — Facilities ====== */}
-          <Route path="/facilities" element={
-             <RequireAuth>
-            <FacilityLayout /> 
-             </RequireAuth>}>
+          <Route 
+            path="/facilities" 
+            element={
+              <RequireAuth>
+                <FacilityLayout /> 
+              </RequireAuth>
+            }
+          >
             <Route index element={<FacilityListPage />} />
             <Route path="add" element={<FacilityCreatePage />} />
             <Route path="edit/:id" element={<FacilityEditPage />} />
           </Route>
 
           {/* ====== MEMBER 2 — Bookings ====== */}
-          <Route path="/bookings" element={
-            <RequireAuth>
-            <BookingLayout />
-            </RequireAuth>
-            }>
-            <Route index element={<BookingListPage />} />
-            <Route path="create" element={<BookingCreatePage />} />
+          <Route 
+            path="/bookings" 
+            element={
+              <RequireAuth>
+                <BookingLayout />
+              </RequireAuth>
+            }
+          >
+            <Route 
+              index 
+              element={
+                <RequireAdmin>
+                  <BookingListPage />
+                </RequireAdmin>
+              } 
+            />
+            <Route 
+              path="create" 
+              element={
+                <RequireUser>
+                  <BookingCreatePage />
+                </RequireUser>
+              } 
+            />
+            {/* User's own bookings view */}
+            <Route 
+              path="my-bookings" 
+              element={
+                <RequireUser>
+                  <UserBookingsPage />
+                </RequireUser>
+              } 
+            />
           </Route>
 
-          {/* ====== MEMBER 4 — Notifications & Auth ====== */}
-          <Route path="/notifications" element={
-            <RequireAuth>
-            <NotificationLayout />
-            </RequireAuth>
-            }>
+          {/* ====== MEMBER 4 — Notifications ====== */}
+          <Route 
+            path="/notifications" 
+            element={
+              <RequireAuth>
+                <NotificationLayout />
+              </RequireAuth>
+            }
+          >
             <Route index element={<NotificationListPage />} />
           </Route>
 
-          {/* Auth Route (to be implemented) */}
+          {/* Auth Route */}
           <Route
             path="/login"
             element={token ? <Navigate to={loginRedirectPath} replace /> : <LoginPage />}
