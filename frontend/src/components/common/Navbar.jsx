@@ -2,11 +2,11 @@ import { NavLink } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import "./Navbar.css";
 import logo from "../../../public/zenith-logo.png";
-import { getCurrentRole } from "../../utils/authSession";
+import { getCurrentRole, isAdminOrSupport, isUserRole } from "../../utils/authSession";
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from "../../api/notificationApi";
 
-
-const MODULE_LINKS = [
+// Base links that are common for all users
+const BASE_LINKS = [
   { 
     to: "/", 
     label: "Home", 
@@ -38,33 +38,6 @@ const MODULE_LINKS = [
       </svg>
     )
   },
-  // Add this to MODULE_LINKS array in Navbar.jsx after the Bookings link
-{ 
-  to: "/bookings/my-bookings", 
-  label: "My Bookings", 
-  icon: () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-      <line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" />
-      <line x1="3" y1="10" x2="21" y2="10" />
-      <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
-    </svg>
-  )
-},
-  { 
-    to: "/bookings", 
-    label: "Bookings", 
-    icon: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-        <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
-      </svg>
-    )
-  },
   { 
     to: "/notifications", 
     label: "Notifications", 
@@ -87,6 +60,51 @@ const MODULE_LINKS = [
   },
 ];
 
+// Get role-based booking links
+const getBookingLinks = () => {
+  const role = getCurrentRole();
+  const isAdminOrSupportUser = isAdminOrSupport();
+  const isRegularUser = isUserRole();
+
+  if (isAdminOrSupportUser) {
+    // Admin/Support sees all bookings management
+    return [
+      { 
+        to: "/bookings", 
+        label: "All Bookings", 
+        icon: () => (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+            <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
+          </svg>
+        )
+      }
+    ];
+  } else if (isRegularUser) {
+    // Regular user sees their own bookings and create booking
+    return [
+      { 
+        to: "/bookings/my-bookings", 
+        label: "My Bookings", 
+        icon: () => (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+            <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
+          </svg>
+        )
+      },
+    ];
+  }
+  
+  return [];
+};
+
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -106,6 +124,10 @@ export default function Navbar() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const notificationRef = useRef(null);
+
+  // Build dynamic navigation links based on role
+  const bookingLinks = getBookingLinks();
+  const MODULE_LINKS = [...BASE_LINKS, ...bookingLinks];
 
   const fetchNotifications = async () => {
     try {

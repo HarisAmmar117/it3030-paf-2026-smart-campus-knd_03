@@ -139,19 +139,26 @@ public class BookingService {
         NotificationType notificationType;
         
         switch (status) {
-                case APPROVED:
+        case APPROVED:
                 notificationType = NotificationType.BOOKING_APPROVED;
                 message = String.format("✅ Your booking for \"%s\" has been APPROVED!", resourceName);
                 break;
-                case REJECTED:
+
+        case REJECTED:
                 notificationType = NotificationType.BOOKING_REJECTED;
                 if (rejectionReason != null && !rejectionReason.isEmpty()) {
-                        message = String.format("❌ Your booking for \"%s\" has been REJECTED.\nReason: %s", resourceName, rejectionReason);
+                message = String.format("❌ Your booking for \"%s\" has been REJECTED.\nReason: %s", resourceName, rejectionReason);
                 } else {
-                        message = String.format("❌ Your booking for \"%s\" has been REJECTED.", resourceName);
+                message = String.format("❌ Your booking for \"%s\" has been REJECTED.", resourceName);
                 }
                 break;
-                default:
+
+        case CANCELLED:
+                notificationType = NotificationType.BOOKING_CANCELLED;
+                message = String.format("⚠️ Your booking for \"%s\" has been CANCELLED.", resourceName);
+                break;
+
+        default:
                 notificationType = NotificationType.BOOKING_CREATED;
                 message = String.format("📋 Your booking for \"%s\" has been submitted and is pending approval.", resourceName);
                 break;

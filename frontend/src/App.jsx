@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import "./App.css";
-import { hasTicketAdminAccess, isUserRole } from "./utils/authSession";
+import { hasTicketAdminAccess, isUserRole, isAdminOrSupport } from "./utils/authSession";
 import { useLocation } from "react-router-dom";
 
 // Shared layout
@@ -48,23 +48,25 @@ import AboutUs from "./pages/AboutUs";
 // ========================
 import LoginPage from "./pages/auth/LoginPage";
 
-function RequireAdmin({ children }) {
-  if (!hasTicketAdminAccess()) return <Navigate to="/tickets" replace />;
+function RequireAdmin({ children, redirectTo = "/tickets" }) {
+  if (!hasTicketAdminAccess()) return <Navigate to={redirectTo} replace />;
   return children;
 }
 
 RequireAdmin.propTypes = {
   children: PropTypes.node.isRequired,
+  redirectTo: PropTypes.string,
 };
 
-function RequireAuth({ children }) {
+function RequireAuth({ children, redirectTo = "/login" }) {
   const token = localStorage.getItem("token");
-  if (!token) return <Navigate to="/login" replace />;
+  if (!token) return <Navigate to={redirectTo} replace />;
   return children;
 }
 
 RequireAuth.propTypes = {
   children: PropTypes.node.isRequired,
+  redirectTo: PropTypes.string,
 };
 
 function RequireUser({ children }) {
@@ -76,6 +78,20 @@ function RequireUser({ children }) {
 }
 
 RequireUser.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+// Require Admin or Support Staff for viewing all bookings
+function RequireAdminOrSupport({ children }) {
+  if (!isAdminOrSupport()) {
+    // If user is regular user, redirect to their own bookings
+    if (isUserRole()) return <Navigate to="/bookings/my-bookings" replace />;
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+}
+
+RequireAdminOrSupport.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
@@ -122,7 +138,7 @@ function App() {
             <Route 
               path="admin" 
               element={
-                <RequireAdmin>
+                <RequireAdmin redirectTo="/tickets">
                   <AdminTicketPage />
                 </RequireAdmin>
               } 
@@ -152,14 +168,17 @@ function App() {
               </RequireAuth>
             }
           >
+            {/* Admin/Support Staff view - all bookings */}
             <Route 
               index 
               element={
-                <RequireAdmin>
+                <RequireAdminOrSupport>
                   <BookingListPage />
-                </RequireAdmin>
+                </RequireAdminOrSupport>
               } 
             />
+            
+            {/* Create booking - only regular users */}
             <Route 
               path="create" 
               element={
@@ -168,7 +187,8 @@ function App() {
                 </RequireUser>
               } 
             />
-            {/* User's own bookings view */}
+            
+            {/* User's own bookings view - only regular users */}
             <Route 
               path="my-bookings" 
               element={
