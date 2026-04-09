@@ -1,8 +1,9 @@
 import { NavLink } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./Navbar.css";
 import logo from "../../../public/zenith-logo.png";
 import { getCurrentRole } from "../../utils/authSession";
+import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from "../../api/notificationApi";
 
 
 const MODULE_LINKS = [
@@ -80,6 +81,65 @@ export default function Navbar() {
       (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
   });
 
+  const token = localStorage.getItem("token");
+  const role = getCurrentRole();
+  const isLoggedIn = !!token;
+  const userName = localStorage.getItem("userName") || "User";
+  const userEmail = localStorage.getItem("userEmail") || "";
+  const userId = Number(localStorage.getItem("userId")) || 2;
+
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const notificationRef = useRef(null);
+
+  const fetchNotifications = async () => {
+    try {
+      const data = await getNotifications(userId);
+      const notificationsArray = Array.isArray(data) ? data : (data.data || []);
+      const latest = notificationsArray
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5);
+
+      const formatted = latest.map((n) => ({
+        id: n.id,
+        heading: n.type?.replace(/_/g, " ") || "Notification",
+        content: n.message || n.title || "No content",
+        time: formatTime(n.createdAt),
+        read: n.read || false,
+      }));
+
+      setNotifications(formatted);
+    } catch (err) {
+      console.error("Failed to fetch notifications:", err);
+    }
+  };
+
+  const fetchUnreadCount = async () => {
+    try {
+      const count = await getUnreadCount(userId);
+      setUnreadCount(count);
+    } catch (err) {
+      console.error("Failed to fetch unread count:", err);
+    }
+  };
+
+  const formatTime = (dateStr) => {
+    if (!dateStr) return "Just now";
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins} min ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+    return date.toLocaleDateString();
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -93,15 +153,49 @@ export default function Navbar() {
     localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
 
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchNotifications();
+      fetchUnreadCount();
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notificationRef.current && !notificationRef.current.contains(e.target)) {
+        setIsNotificationOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const toggleTheme = () => setIsDark(!isDark);
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  const toggleNotification = () => setIsNotificationOpen(!isNotificationOpen);
 
-  const token = localStorage.getItem("token");
-  const role = getCurrentRole();
-  const isLoggedIn = !!token;
-  const userName = localStorage.getItem("userName") || "User";
-  const userEmail = localStorage.getItem("userEmail") || "";
+  const handleMarkAsRead = async (id) => {
+    try {
+      await markAsRead(id, userId);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error("Failed to mark as read:", err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsRead(userId);
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error("Failed to mark all as read:", err);
+    }
+  };
 
   const visibleLinks = MODULE_LINKS.filter((item) => {
     if (item.to === "/" || item.to === "/about") return true;
@@ -167,6 +261,64 @@ export default function Navbar() {
               )}
             </button>
 
+            {isLoggedIn && (
+              <div className="notification-wrapper" ref={notificationRef}>
+                <button onClick={toggleNotification} className="notification-btn" aria-label="Notifications">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                  {unreadCount > 0 && (
+                    <span className="notification-badge">{unreadCount}</span>
+                  )}
+                </button>
+
+                {isNotificationOpen && (
+                  <div className="notification-dropdown">
+                    <div className="notification-header">
+                      <h3>Notifications</h3>
+                      {unreadCount > 0 && (
+                        <button onClick={handleMarkAllAsRead} className="mark-all-read">
+                          Mark all as read
+                        </button>
+                      )}
+                    </div>
+                    <div className="notification-list">
+                      {notifications.length === 0 ? (
+                        <div className="notification-empty">
+                          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                          </svg>
+                          <p>No notifications</p>
+                        </div>
+                      ) : (
+                        notifications.map((n) => (
+                          <div
+                            key={n.id}
+                            className={`notification-item ${!n.read ? "unread" : ""}`}
+                            onClick={() => handleMarkAsRead(n.id)}
+                          >
+                            <div className="notification-dot"></div>
+                            <div className="notification-content">
+                              <div className="notification-heading">{n.heading}</div>
+                              <div className="notification-message">{n.content}</div>
+                              <div className="notification-time">{n.time}</div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    <div className="notification-footer">
+                      <NavLink to="/notifications" onClick={() => setIsNotificationOpen(false)}>
+                        View all notifications
+                      </NavLink>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {isLoggedIn ? (
               <button
                 className="theme-toggle-btn"
@@ -191,6 +343,14 @@ export default function Navbar() {
             {/* Logged-in User Name */}
             <div className="user-name-chip" title={userName}>
               {isLoggedIn ? userName : "Guest"}
+            </div>
+
+            {/* User Avatar */}
+            <div className="user-avatar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
             </div>
 
             {/* Mobile Menu Button */}
