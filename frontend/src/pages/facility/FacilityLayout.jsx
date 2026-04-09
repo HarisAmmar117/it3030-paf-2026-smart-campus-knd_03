@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "./FacilityLayout.css";
 
@@ -45,6 +45,17 @@ export default function FacilityLayout() {
 
   const toggleTheme = () => setIsDark(!isDark);
 
+  const location = useLocation();
+  const isUserRoute = location.pathname.startsWith('/user-facilities');
+  const tabsToDisplay = isUserRoute 
+    ? [{ 
+        to: "/user-facilities", 
+        label: "View Resources", 
+        end: true,
+        icon: FACILITY_TABS[0].icon
+      }] 
+    : FACILITY_TABS;
+
   return (
     <div className="facility-layout">
       {/* Global Theme Toggle */}
@@ -85,7 +96,7 @@ export default function FacilityLayout() {
       {/* Sub-navigation tabs */}
       <div className="tabs-container">
         <div className="tabs-wrapper">
-          {FACILITY_TABS.map((tab) => (
+          {tabsToDisplay.map((tab) => (
             <NavLink
               key={tab.to}
               to={tab.to}
