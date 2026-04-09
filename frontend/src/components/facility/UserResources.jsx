@@ -1,29 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { getResources, deleteResource } from '../../api/resourceApi';
+import { getResources } from '../../api/resourceApi';
 import ResourceCard from './ResourceCard';
 import './ResourceList.css';
 
 const TYPE_OPTIONS = ['', 'ROOM', 'LAB', 'EQUIPMENT'];
 
-const ResourceList = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
+const UserResources = () => {
     const [resources, setResources] = useState([]);
     const [filters, setFilters] = useState({ type: '' });
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
-
-    useEffect(() => {
-        if (location.state && location.state.successMessage) {
-            setSuccessMessage(location.state.successMessage);
-            window.history.replaceState({}, document.title);
-            const timer = setTimeout(() => setSuccessMessage(''), 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [location]);
 
     const loadResources = useCallback(async () => {
         setLoading(true);
@@ -51,18 +38,6 @@ const ResourceList = () => {
         loadResources();
     };
 
-    const handleDelete = async (id) => {
-        const confirmed = window.confirm('Are you sure you want to delete this resource?');
-        if (!confirmed) return;
-
-        try {
-            await deleteResource(id);
-            await loadResources();
-        } catch (err) {
-            setError(err.message || 'Failed to delete resource');
-        }
-    };
-
     const filteredResources = resources.filter((r) => {
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase();
@@ -86,8 +61,8 @@ const ResourceList = () => {
                         </svg>
                     </div>
                     <div>
-                        <h2>Resource Catalogue</h2>
-                        <p>Review available campus facilities and assets in real time.</p>
+                        <h2>Resource Catalogue (User View)</h2>
+                        <p>Browse available campus facilities and equipment.</p>
                     </div>
                 </div>
                 <button type="button" className="refresh-btn" onClick={loadResources} disabled={loading}>
@@ -145,7 +120,7 @@ const ResourceList = () => {
                 </div>
             </form>
 
-            {/* Error & Success alerts */}
+            {/* Error alerts */}
             {error && (
                 <div className="alert alert-error">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -154,15 +129,6 @@ const ResourceList = () => {
                         <line x1="12" y1="16" x2="12.01" y2="16" />
                     </svg>
                     {error}
-                </div>
-            )}
-            {successMessage && (
-                <div className="alert alert-success">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                        <polyline points="22 4 12 14.01 9 11.01" />
-                    </svg>
-                    {successMessage}
                 </div>
             )}
 
@@ -183,7 +149,7 @@ const ResourceList = () => {
                         <path d="M4 4v6M14 4v2M2 21h20" />
                     </svg>
                     <h3>No resources found</h3>
-                    <p>Try changing filters or add a new resource using the "Add Resource" tab.</p>
+                    <p>Try changing your search or filters.</p>
                 </div>
             )}
 
@@ -194,8 +160,7 @@ const ResourceList = () => {
                         <ResourceCard 
                             key={resource.id} 
                             resource={resource} 
-                            isAdmin={true} 
-                            onDelete={handleDelete} 
+                            isAdmin={false} 
                         />
                     ))}
                 </div>
@@ -204,4 +169,4 @@ const ResourceList = () => {
     );
 };
 
-export default ResourceList;
+export default UserResources;
