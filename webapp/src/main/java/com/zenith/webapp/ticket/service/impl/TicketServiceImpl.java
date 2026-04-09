@@ -1,5 +1,8 @@
 package com.zenith.webapp.ticket.service.impl;
 
+import com.zenith.webapp.auth.enums.UserRole;
+import com.zenith.webapp.auth.model.User;
+import com.zenith.webapp.auth.repository.UserRepository;
 import com.zenith.webapp.ticket.dto.request.AssignTicketRequest;
 import com.zenith.webapp.ticket.dto.request.CreateCommentRequest;
 import com.zenith.webapp.ticket.dto.request.CreateTicketRequest;
@@ -42,6 +45,7 @@ public class TicketServiceImpl implements TicketService {
     private final TicketRepository ticketRepository;
     private final TicketAttachmentRepository attachmentRepository;
     private final TicketCommentRepository commentRepository;
+    private final UserRepository userRepository;
 
     @Value("${app.ticket.upload-dir:uploads/tickets}")
     private String uploadBaseDir;
@@ -84,21 +88,31 @@ public class TicketServiceImpl implements TicketService {
     public TicketResponse updateStatus(Long ticketId, UpdateTicketStatusRequest request, Long actorUserId, String actorRole) {
         Ticket ticket = getTicketOrThrow(ticketId);
 
-        boolean isAdmin = isAdmin(actorRole);
+        boolean isAdminLike = isAdminLike(actorRole);
+        boolean isPrimaryAdmin = isPrimaryAdmin(actorRole);
+        boolean isSupportStaff = isSupportStaff(actorRole);
         boolean isAssignee = ticket.getAssigneeId() != null && ticket.getAssigneeId().equals(actorUserId);
 
-        if (!isAdmin && !isAssignee) {
+        if (!isAdminLike && !isAssignee) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only assignee or admin can update status");
         }
 
-        validateTransition(ticket.getStatus(), request.getStatus(), isAdmin);
+        if (isSupportStaff &&
+                (request.getStatus() == TicketStatus.IN_PROGRESS || request.getStatus() == TicketStatus.RESOLVED)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Support staff cannot change ticket status to IN_PROGRESS or RESOLVED"
+            );
+        }
+
+        validateTransition(ticket.getStatus(), request.getStatus(), isPrimaryAdmin);
 
         if (request.getStatus() == TicketStatus.RESOLVED && isBlank(request.getResolutionNotes())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Resolution notes are required for RESOLVED");
         }
 
         if (request.getStatus() == TicketStatus.REJECTED) {
-            if (!isAdmin) {
+            if (!isPrimaryAdmin) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin can reject ticket");
             }
             if (isBlank(request.getRejectionReason())) {
@@ -119,11 +133,22 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public TicketResponse assignTicket(Long ticketId, AssignTicketRequest request, Long actorUserId, String actorRole) {
-        if (!isAdmin(actorRole)) {
+        if (!isPrimaryAdmin(actorRole)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin can assign ticket");
         }
 
         Ticket ticket = getTicketOrThrow(ticketId);
+
+        User assignee = userRepository.findById(request.getAssigneeId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignee user not found"));
+
+        if (assignee.getRole() != UserRole.SUPPORT_STAFF) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ticket can only be assigned to SUPPORT_STAFF");
+        }
+
+        if (request.getAssigneeId() != null && request.getAssigneeId().equals(actorUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin cannot self-assign a ticket");
+        }
         ticket.setAssigneeId(request.getAssigneeId());
         Ticket updated = ticketRepository.save(ticket);
         return toTicketResponse(updated);
@@ -234,7 +259,7 @@ public class TicketServiceImpl implements TicketService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comment does not belong to ticket");
         }
 
-        boolean canEdit = comment.getAuthorId().equals(actorUserId) || isAdmin(actorRole);
+        boolean canEdit = comment.getAuthorId().equals(actorUserId) || isAdminLike(actorRole);
         if (!canEdit) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only owner or admin can edit comment");
         }
@@ -255,7 +280,7 @@ public class TicketServiceImpl implements TicketService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comment does not belong to ticket");
         }
 
-        boolean canDelete = comment.getAuthorId().equals(actorUserId) || isAdmin(actorRole);
+        boolean canDelete = comment.getAuthorId().equals(actorUserId) || isAdminLike(actorRole);
         if (!canDelete) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only owner or admin can delete comment");
         }
@@ -344,8 +369,16 @@ public class TicketServiceImpl implements TicketService {
                 .build();
     }
 
-    private boolean isAdmin(String role) {
+    private boolean isPrimaryAdmin(String role) {
         return role != null && role.equalsIgnoreCase("ADMIN");
+    }
+
+    private boolean isSupportStaff(String role) {
+        return role != null && role.equalsIgnoreCase("SUPPORT_STAFF");
+    }
+
+    private boolean isAdminLike(String role) {
+        return isPrimaryAdmin(role) || isSupportStaff(role);
     }
 
     private boolean isBlank(String value) {

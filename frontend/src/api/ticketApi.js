@@ -336,3 +336,29 @@ export async function updateTicketStatus(
   }
   return data;
 }
+
+export async function registerSupportStaff(payload, role = "ADMIN") {
+  const response = await fetch(`${BASE_URL}/api/users/support-staff`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-User-Role": role,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to register support staff";
+    throw new Error(message);
+  }
+
+  return data;
+}

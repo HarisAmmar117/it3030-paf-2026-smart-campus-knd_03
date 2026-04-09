@@ -2,12 +2,14 @@ import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "./Navbar.css";
 import logo from "../../../public/zenith-logo.png";
+import { getCurrentRole } from "../../utils/authSession";
+
 
 const MODULE_LINKS = [
   { 
     to: "/", 
     label: "Home", 
-    icon: (active) => (
+    icon: () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
         <polyline points="9 22 9 12 15 12 15 22" />
@@ -18,7 +20,7 @@ const MODULE_LINKS = [
   { 
     to: "/tickets", 
     label: "Tickets", 
-    icon: (active) => (
+    icon: () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
         <path d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2z" />
       </svg>
@@ -27,7 +29,7 @@ const MODULE_LINKS = [
   { 
     to: "/facilities", 
     label: "Facilities", 
-    icon: (active) => (
+    icon: () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
         <rect x="4" y="10" width="6" height="11" rx="1" />
         <rect x="14" y="6" width="6" height="15" rx="1" />
@@ -38,7 +40,7 @@ const MODULE_LINKS = [
   { 
     to: "/bookings", 
     label: "Bookings", 
-    icon: (active) => (
+    icon: () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
         <line x1="16" y1="2" x2="16" y2="6" />
@@ -51,7 +53,7 @@ const MODULE_LINKS = [
   { 
     to: "/notifications", 
     label: "Notifications", 
-    icon: (active) => (
+    icon: () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
@@ -61,7 +63,7 @@ const MODULE_LINKS = [
   { 
     to: "/about", 
     label: "About", 
-    icon: (active) => (
+    icon: () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
         <circle cx="12" cy="12" r="10" />
         <path d="M12 16v-4M12 8h.01" />
@@ -95,6 +97,18 @@ export default function Navbar() {
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
+  const token = localStorage.getItem("token");
+  const role = getCurrentRole();
+  const isLoggedIn = !!token;
+  const userName = localStorage.getItem("userName") || "User";
+  const userEmail = localStorage.getItem("userEmail") || "";
+
+  const visibleLinks = MODULE_LINKS.filter((item) => {
+    if (item.to === "/" || item.to === "/about") return true;
+    if (!isLoggedIn) return false;
+    return true;
+  });
+
   return (
     <>
       <nav className={`navbar ${isScrolled ? "navbar-scrolled" : ""}`}>
@@ -112,7 +126,7 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="navbar-links-desktop">
-            {MODULE_LINKS.map((item) => (
+            {visibleLinks.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -153,12 +167,30 @@ export default function Navbar() {
               )}
             </button>
 
-            {/* User Avatar */}
-            <div className="user-avatar">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
+            {isLoggedIn ? (
+              <button
+                className="theme-toggle-btn"
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  localStorage.removeItem("userId");
+                  localStorage.removeItem("role");
+                  localStorage.removeItem("userName");
+                  localStorage.removeItem("userEmail");
+                  window.location.href = "/login";
+                }}
+                title={`Logout (${role})`}
+              >
+                Logout
+              </button>
+            ) : (
+              <NavLink to="/login" className="theme-toggle-btn" title="Login">
+                Login
+              </NavLink>
+            )}
+
+            {/* Logged-in User Name */}
+            <div className="user-name-chip" title={userName}>
+              {isLoggedIn ? userName : "Guest"}
             </div>
 
             {/* Mobile Menu Button */}
@@ -190,7 +222,7 @@ export default function Navbar() {
             </div>
           </div>
           <div className="mobile-menu-links">
-            {MODULE_LINKS.map((item) => (
+            {visibleLinks.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -217,8 +249,10 @@ export default function Navbar() {
                 </svg>
               </div>
               <div>
-                <div className="mobile-user-name">John Doe</div>
-                <div className="mobile-user-email">john@campus.edu</div>
+                <div className="mobile-user-name">{isLoggedIn ? userName : "Guest"}</div>
+                <div className="mobile-user-email">
+                  {isLoggedIn ? userEmail || role : "Not signed in"}
+                </div>
               </div>
             </div>
           </div>
