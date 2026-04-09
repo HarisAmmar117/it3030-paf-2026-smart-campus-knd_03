@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import PropTypes from "prop-types";
 import {
   getAttachments,
   uploadAttachments,
@@ -10,7 +11,7 @@ import "./AttachmentSection.css";
 const MAX_ATTACHMENTS = 3;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
-export default function AttachmentSection({ ticketId }) {
+export default function AttachmentSection({ ticketId, readOnly = false }) {
   const [attachments, setAttachments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -110,7 +111,7 @@ export default function AttachmentSection({ ticketId }) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const canUpload = attachments.length < MAX_ATTACHMENTS;
+  const canUpload = !readOnly && attachments.length < MAX_ATTACHMENTS;
 
   return (
     <div className="attachment-section">
@@ -172,6 +173,7 @@ export default function AttachmentSection({ ticketId }) {
                 className="attachment-delete"
                 onClick={() => handleDelete(att.id, att.originalFileName)}
                 title="Delete attachment"
+                disabled={readOnly}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="18" y1="6" x2="6" y2="18" />
@@ -180,6 +182,12 @@ export default function AttachmentSection({ ticketId }) {
               </button>
             </div>
           ))}
+        </div>
+      )}
+
+      {readOnly && (
+        <div className="attachment-readonly-note">
+          Admin view only: upload and delete are disabled.
         </div>
       )}
 
@@ -251,3 +259,8 @@ export default function AttachmentSection({ ticketId }) {
     </div>
   );
 }
+
+AttachmentSection.propTypes = {
+  ticketId: PropTypes.number.isRequired,
+  readOnly: PropTypes.bool,
+};

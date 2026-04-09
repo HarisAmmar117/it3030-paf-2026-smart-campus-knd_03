@@ -73,8 +73,9 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<TicketResponse> getTickets(TicketStatus status, TicketPriority priority) {
+    public List<TicketResponse> getTickets(TicketStatus status, TicketPriority priority, Long requesterId) {
         return ticketRepository.findAll().stream()
+                .filter(t -> requesterId == null || t.getRequesterId().equals(requesterId))
                 .filter(t -> status == null || t.getStatus() == status)
                 .filter(t -> priority == null || t.getPriority() == priority)
                 .map(this::toTicketResponse)

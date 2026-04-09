@@ -52,17 +52,23 @@ export default function TicketList() {
   };
 
   const loadTickets = useCallback(async () => {
+    if (!currentUserId) {
+      setTickets([]);
+      setError("User session not found. Please log in again.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
-      const data = await getTickets({ status, priority });
+      const data = await getTickets({ status, priority, requesterId: currentUserId });
       setTickets(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.message || "Unable to load tickets");
     } finally {
       setLoading(false);
     }
-  }, [status, priority]);
+  }, [status, priority, currentUserId]);
 
   useEffect(() => {
     loadTickets();
@@ -392,6 +398,10 @@ export default function TicketList() {
                           </select>
                         </div>
                       </div>
+
+                      {editContactError && (
+                        <div className="alert alert-error">{editContactError}</div>
+                      )}
 
                       <div className="ticket-edit-actions">
                         <button type="submit" className="btn-save" disabled={savingEdit}>

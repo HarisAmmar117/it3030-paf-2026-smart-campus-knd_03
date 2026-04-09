@@ -37,6 +37,7 @@ export async function getTickets(filters = {}) {
 
   if (filters.status) params.append("status", filters.status);
   if (filters.priority) params.append("priority", filters.priority);
+  if (filters.requesterId != null) params.append("requesterId", String(filters.requesterId));
 
   const query = params.toString();
   const url = `${BASE_URL}/api/tickets${query ? `?${query}` : ""}`;

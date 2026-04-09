@@ -51,9 +51,10 @@ public class TicketController {
     @GetMapping
     public ResponseEntity<List<TicketResponse>> getTickets(
         @RequestParam(required = false) TicketStatus status,
-        @RequestParam(required = false) TicketPriority priority
+        @RequestParam(required = false) TicketPriority priority,
+        @RequestParam(required = false) Long requesterId
 ) {
-    return ResponseEntity.ok(ticketService.getTickets(status, priority));
+    return ResponseEntity.ok(ticketService.getTickets(status, priority, requesterId));
 }
 
     @PatchMapping("/{ticketId}")

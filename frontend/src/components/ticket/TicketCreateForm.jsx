@@ -37,6 +37,9 @@ export default function TicketCreateForm() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "preferredContactDetails") {
+      setContactError("");
+    }
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -248,8 +251,14 @@ export default function TicketCreateForm() {
             placeholder="e.g. john@campus.edu or +94 77 123 4567"
             value={form.preferredContactDetails}
             onChange={handleChange}
+            className={contactError ? "input-invalid" : ""}
+            aria-invalid={Boolean(contactError)}
+            aria-describedby={contactError ? "contact-error" : undefined}
             required
           />
+          {contactError ? (
+            <p id="contact-error" className="field-error">{contactError}</p>
+          ) : null}
         </div>
 
           {/* Submit */}
