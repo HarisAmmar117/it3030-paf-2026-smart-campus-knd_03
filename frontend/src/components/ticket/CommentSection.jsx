@@ -7,7 +7,7 @@ import {
 } from "../../api/ticketApi";
 import "./CommentSection.css";
 
-export default function CommentSection({ ticketId, currentUserId = 101 }) {
+export default function CommentSection({ ticketId, currentUserId }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);

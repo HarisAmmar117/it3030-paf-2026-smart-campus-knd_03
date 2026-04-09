@@ -446,7 +446,7 @@ export default function AdminTicketQueue() {
                     </button>
                   </div>
 
-                  {openAttachments[t.id] && <AttachmentSection ticketId={t.id} />}
+                  {openAttachments[t.id] && <AttachmentSection ticketId={t.id} readOnly />}
                   {openComments[t.id] && <CommentSection ticketId={t.id} currentUserId={actorUserId} />}
                 </div>
               )}
