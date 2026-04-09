@@ -31,4 +31,6 @@ public interface NotificationService {
 
     // DELETE
     void deleteNotification(Long notificationId, Long actorUserId);
+
+    void deleteNotification(Long id);
 }

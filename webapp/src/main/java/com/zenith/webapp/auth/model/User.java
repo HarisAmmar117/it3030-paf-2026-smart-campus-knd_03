@@ -9,6 +9,8 @@ import com.zenith.webapp.auth.enums.UserRole;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,6 +33,7 @@ public class User {
 
     private String phone;
 
+    @Enumerated(EnumType.ORDINAL)
     private UserRole role = UserRole.USER;
 
     private String provider;     

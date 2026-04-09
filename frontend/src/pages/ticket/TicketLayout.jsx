@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { hasTicketAdminAccess } from "../../utils/authSession";
 import "./TicketLayout.css";
 
 const TICKET_TABS = [
@@ -55,7 +56,13 @@ export default function TicketLayout() {
   }, [isDark]);
 
   const toggleTheme = () => setIsDark(!isDark);
+  const visibleTicketTabs = TICKET_TABS.filter((tab) => {
+    if (hasTicketAdminAccess()) {
+      return tab.to === "/tickets/admin";
+    }
 
+    return tab.to !== "/tickets/admin";
+  });
   return (
     <div className="ticket-layout">
       {/* Global Theme Toggle */}
@@ -78,20 +85,20 @@ export default function TicketLayout() {
       {/* Sub-navigation tabs */}
       <div className="tabs-container">
         <div className="tabs-wrapper">
-          {TICKET_TABS.map((tab) => (
-            <NavLink
-              key={tab.to}
-              to={tab.to}
-              end={tab.end}
-              className={({ isActive }) =>
-                `ticket-tab ${isActive ? "ticket-tab-active" : ""}`
-              }
-            >
-              <span className="tab-icon">{tab.icon()}</span>
-              <span className="tab-label">{tab.label}</span>
-              <span className="tab-indicator"></span>
-            </NavLink>
-          ))}
+         {visibleTicketTabs.map((tab) => (
+          <NavLink
+            key={tab.to}
+            to={tab.to}
+            end={tab.end}
+            className={({ isActive }) =>
+              `ticket-tab ${isActive ? "ticket-tab-active" : ""}`
+            }
+          >
+            <span className="tab-icon">{tab.icon()}</span>
+            <span className="tab-label">{tab.label}</span>
+            <span className="tab-indicator"></span>
+          </NavLink>
+        ))}
         </div>
       </div>
 

@@ -72,11 +72,17 @@ public class NotificationController {
     }
 
     // DELETE — DELETE /api/notifications/{id}
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/my/{id}")
     public ResponseEntity<Void> deleteNotification(
             @PathVariable Long id,
             @RequestHeader("X-User-Id") Long actorUserId) {
         notificationService.deleteNotification(id, actorUserId);
         return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteNotification(@PathVariable("id") Long id) {
+        notificationService.deleteNotification(id);
+        return ResponseEntity.ok("Notification deleted successfully");
     }
 }
