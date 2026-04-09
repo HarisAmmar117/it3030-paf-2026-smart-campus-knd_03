@@ -47,7 +47,7 @@
 .booking-list-container {
   min-height: 100vh;
   padding: 24px;
-  background: var(--bg-primary);
+
 }
 
 .booking-list-card {
@@ -648,4 +648,201 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
+}
+
+/* Approve Button Styles */
+.action-btn.approve {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+.action-btn.approve:hover:not(:disabled) {
+  background: var(--success);
+  color: white;
+}
+
+/* Reject Button Styles */
+.action-btn.reject {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.action-btn.reject:hover:not(:disabled) {
+  background: var(--danger);
+  color: white;
+}
+
+/* Disabled button state */
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success alert */
+.alert-success {
+  margin: 20px 28px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--success-bg);
+  color: var(--success);
+  border-left: 3px solid var(--success);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Global Theme Toggle */
+.global-theme-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-medium);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: var(--accent);
+  z-index: 100;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(10px);
+}
+
+.global-theme-toggle:hover {
+  transform: scale(1.1);
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* Approve Button */
+.action-btn.approve {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+.action-btn.approve:hover:not(:disabled) {
+  background: var(--success);
+  color: white;
+}
+
+/* Reject Button */
+.action-btn.reject {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.action-btn.reject:hover:not(:disabled) {
+  background: var(--danger);
+  color: white;
+}
+
+/* Disabled button state */
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success Alert */
+.alert-success {
+  margin: 20px 28px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--success-bg);
+  color: var(--success);
+  border-left: 3px solid var(--success);
+  animation: slideIn 0.3s ease;
+}
+
+/* Error Alert */
+.alert-error {
+  margin: 20px 28px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-left: 3px solid var(--danger);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Action buttons container */
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.action-btn.edit {
+  background: var(--info-bg);
+  color: var(--info);
+  border: 1px solid var(--info);
+}
+
+.action-btn.edit:hover {
+  background: var(--info);
+  color: white;
+}
+
+.action-btn.delete {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.action-btn.delete:hover {
+  background: var(--danger);
+  color: white;
 }

@@ -52,12 +52,17 @@ public class BookingController {
     }
 
     // UPDATE STATUS
-    @PutMapping("/{id}/status")
-    public ResponseEntity<BookingResponse> updateStatus(
-            @PathVariable Long id,
+    @PutMapping("/{bookingId}/status")
+    public ResponseEntity<BookingResponse> updateBookingStatus(
+            @PathVariable Long bookingId,
             @RequestBody BookingStatusRequest request) {
-        return ResponseEntity.ok(
-                bookingService.updateBookingStatus(id, request.getStatus()));
+        
+        BookingResponse response = bookingService.updateBookingStatus(
+            bookingId, 
+            request.getStatus(),
+            request.getRejectionReason()
+        );
+        return ResponseEntity.ok(response);
     }
 
     // DELETE

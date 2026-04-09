@@ -18,6 +18,8 @@
   --shadow-lg: 0 10px 40px -12px rgba(0, 0, 0, 0.1);
   --gradient-start: #fefaf5;
   --gradient-end: #fff5e8;
+  /* ADD RGB VARIABLES */
+  --bg-secondary-rgb: 255, 255, 255;
 }
 
 [data-theme="dark"] {
@@ -39,6 +41,8 @@
   --shadow-lg: 0 10px 40px -12px rgba(0, 0, 0, 0.5);
   --gradient-start: #0d0d0d;
   --gradient-end: #141414;
+  /* ADD RGB VARIABLES FOR DARK */
+  --bg-secondary-rgb: 26, 26, 26;
 }
 
 /* ========== GLOBAL LAYOUT ========== */
@@ -125,9 +129,16 @@ body {
   margin: 0 auto;
 }
 
+/* REMOVED duplicate .header-badge - keeping only the one with SVG support */
 .header-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 16px;
+}
+
+.header-badge svg {
+  stroke: white;
 }
 
 .header-badge span {
@@ -168,7 +179,7 @@ body {
   top: 0;
   z-index: 50;
   backdrop-filter: blur(10px);
-  background: rgba(var(--bg-secondary-rgb), 0.95);
+  /* FIXED: removed rgba() with missing variable */
 }
 
 .tabs-wrapper {
@@ -179,6 +190,7 @@ body {
   padding: 0 32px;
   overflow-x: auto;
   scrollbar-width: thin;
+  
 }
 
 .tabs-wrapper::-webkit-scrollbar {
@@ -196,14 +208,22 @@ body {
   font-size: 0.9rem;
   font-weight: 500;
   transition: all 0.2s ease;
-  border-bottom: 2px solid transparent;
   position: relative;
   white-space: nowrap;
+  border-bottom: 2px solid transparent;
 }
 
-.booking-tab .tab-icon {
-  font-size: 1.1rem;
+/* SINGLE tab-icon definition */
+.tab-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.2s ease;
+}
+
+.tab-icon svg {
+  stroke: currentColor;
+  stroke-width: 1.75;
 }
 
 .booking-tab:hover {
@@ -215,14 +235,21 @@ body {
   transform: translateY(-2px);
 }
 
+.booking-tab:hover .tab-icon svg {
+  stroke-width: 2;
+}
+
 .booking-tab-active {
   color: var(--accent);
-  border-bottom-color: var(--accent);
   background: var(--accent-light);
 }
 
 .booking-tab-active .tab-icon {
   transform: translateY(-1px);
+}
+
+.booking-tab-active .tab-icon svg {
+  stroke-width: 2;
 }
 
 .tab-indicator {
@@ -298,11 +325,15 @@ body {
 }
 
 .footer-stats {
-  font-size: 0.8rem;
-  color: var(--text-tertiary);
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+}
+
+.footer-stats svg {
+  stroke: currentColor;
 }
 
 /* ========== RESPONSIVE DESIGN ========== */
@@ -325,15 +356,15 @@ body {
 
   .booking-tab {
     padding: 12px 16px;
-    font-size: 0.85rem;
   }
-
+  
   .booking-tab .tab-label {
     display: none;
   }
-
-  .booking-tab .tab-icon {
-    font-size: 1.2rem;
+  
+  .tab-icon svg {
+    width: 16px;
+    height: 16px;
   }
 
   .layout-content {
@@ -441,98 +472,5 @@ body {
   
   .layout-content {
     padding: 20px;
-  }
-}
-
-/* Add these styles to your existing BookingLayout.css */
-
-/* Header badge icon styling */
-.header-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.header-badge svg {
-  stroke: white;
-}
-
-.header-badge span {
-  display: inline-block;
-  padding: 4px 12px;
-  background: var(--accent);
-  color: white;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Tab icon styling */
-.tab-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease;
-}
-
-.tab-icon svg {
-  stroke: currentColor;
-  stroke-width: 1.75;
-}
-
-.booking-tab:hover .tab-icon svg {
-  stroke-width: 2;
-}
-
-.booking-tab-active .tab-icon svg {
-  stroke-width: 2;
-}
-
-/* Footer stats icon */
-.footer-stats {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.8rem;
-  color: var(--text-tertiary);
-}
-
-.footer-stats svg {
-  stroke: currentColor;
-}
-
-/* Remove the old emoji styles if any */
-.tab-icon {
-  font-size: 0;
-}
-
-/* Adjust tab padding for better icon alignment */
-.booking-tab {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 24px;
-  color: var(--text-secondary);
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  border-bottom: 2px solid transparent;
-  position: relative;
-  white-space: nowrap;
-}
-
-/* Mobile adjustments */
-@media (max-width: 768px) {
-  .booking-tab {
-    padding: 12px 16px;
-  }
-  
-  .tab-icon svg {
-    width: 16px;
-    height: 16px;
   }
 }
