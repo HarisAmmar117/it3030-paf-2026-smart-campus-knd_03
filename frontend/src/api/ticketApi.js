@@ -1,11 +1,17 @@
 const BASE_URL = "http://localhost:8081";
+import { getCurrentUserId } from "../utils/authSession";
 
-export async function createTicket(payload, userId = 101) {
+function resolveUserId(explicitUserId) {
+  return explicitUserId ?? getCurrentUserId();
+}
+
+export async function createTicket(payload, userId) {
+  const resolvedUserId = resolveUserId(userId);
   const response = await fetch(`${BASE_URL}/api/tickets`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-User-Id": String(userId),
+      "X-User-Id": String(resolvedUserId),
     },
     body: JSON.stringify(payload),
   });
@@ -53,12 +59,13 @@ export async function getTickets(filters = {}) {
   return data;
 }
 
-export async function updateTicket(ticketId, payload, userId = 101) {
+export async function updateTicket(ticketId, payload, userId) {
+  const resolvedUserId = resolveUserId(userId);
   const response = await fetch(`${BASE_URL}/api/tickets/${ticketId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      "X-User-Id": String(userId),
+      "X-User-Id": String(resolvedUserId),
     },
     body: JSON.stringify(payload),
   });
@@ -79,11 +86,12 @@ export async function updateTicket(ticketId, payload, userId = 101) {
   return data;
 }
 
-export async function deleteTicket(ticketId, userId = 101) {
+export async function deleteTicket(ticketId, userId) {
+  const resolvedUserId = resolveUserId(userId);
   const response = await fetch(`${BASE_URL}/api/tickets/${ticketId}`, {
     method: "DELETE",
     headers: {
-      "X-User-Id": String(userId),
+      "X-User-Id": String(resolvedUserId),
     },
   });
 
@@ -121,14 +129,15 @@ export async function getComments(ticketId) {
   return data;
 }
 
-export async function addComment(ticketId, content, userId = 101) {
+export async function addComment(ticketId, content, userId) {
+  const resolvedUserId = resolveUserId(userId);
   const response = await fetch(
     `${BASE_URL}/api/tickets/${ticketId}/comments`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-User-Id": String(userId),
+        "X-User-Id": String(resolvedUserId),
       },
       body: JSON.stringify({ content }),
     }
@@ -151,16 +160,17 @@ export async function updateComment(
   ticketId,
   commentId,
   content,
-  userId = 101,
+  userId,
   role = "USER"
 ) {
+  const resolvedUserId = resolveUserId(userId);
   const response = await fetch(
     `${BASE_URL}/api/tickets/${ticketId}/comments/${commentId}`,
     {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        "X-User-Id": String(userId),
+        "X-User-Id": String(resolvedUserId),
         "X-User-Role": role,
       },
       body: JSON.stringify({ content }),
@@ -183,15 +193,16 @@ export async function updateComment(
 export async function deleteComment(
   ticketId,
   commentId,
-  userId = 101,
+  userId,
   role = "USER"
 ) {
+  const resolvedUserId = resolveUserId(userId);
   const response = await fetch(
     `${BASE_URL}/api/tickets/${ticketId}/comments/${commentId}`,
     {
       method: "DELETE",
       headers: {
-        "X-User-Id": String(userId),
+        "X-User-Id": String(resolvedUserId),
         "X-User-Role": role,
       },
     }

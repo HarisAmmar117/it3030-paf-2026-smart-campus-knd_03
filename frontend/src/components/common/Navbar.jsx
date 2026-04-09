@@ -1,8 +1,8 @@
 import { NavLink } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "./Navbar.css";
 import logo from "../../../public/zenith-logo.png";
-import { getCurrentRole } from "../../utils/authSession";
+import { getCurrentRole, getCurrentUserId } from "../../utils/authSession";
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from "../../api/notificationApi";
 
 
@@ -86,14 +86,15 @@ export default function Navbar() {
   const isLoggedIn = !!token;
   const userName = localStorage.getItem("userName") || "User";
   const userEmail = localStorage.getItem("userEmail") || "";
-  const userId = Number(localStorage.getItem("userId")) || 2;
+  const userId = getCurrentUserId();
 
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const notificationRef = useRef(null);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
+    if (!userId) return;
     try {
       const data = await getNotifications(userId);
       const notificationsArray = Array.isArray(data) ? data : (data.data || []);
@@ -113,16 +114,17 @@ export default function Navbar() {
     } catch (err) {
       console.error("Failed to fetch notifications:", err);
     }
-  };
+  }, [userId]);
 
-  const fetchUnreadCount = async () => {
+  const fetchUnreadCount = useCallback(async () => {
+    if (!userId) return;
     try {
       const count = await getUnreadCount(userId);
       setUnreadCount(count);
     } catch (err) {
       console.error("Failed to fetch unread count:", err);
     }
-  };
+  }, [userId]);
 
   const formatTime = (dateStr) => {
     if (!dateStr) return "Just now";
@@ -158,7 +160,7 @@ export default function Navbar() {
       fetchNotifications();
       fetchUnreadCount();
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, fetchNotifications, fetchUnreadCount]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -176,6 +178,7 @@ export default function Navbar() {
   const toggleNotification = () => setIsNotificationOpen(!isNotificationOpen);
 
   const handleMarkAsRead = async (id) => {
+    if (!userId) return;
     try {
       await markAsRead(id, userId);
       setNotifications((prev) =>
@@ -188,6 +191,7 @@ export default function Navbar() {
   };
 
   const handleMarkAllAsRead = async () => {
+    if (!userId) return;
     try {
       await markAllAsRead(userId);
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));

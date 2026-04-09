@@ -3,6 +3,9 @@ package com.zenith.webapp.ticket.service.impl;
 import com.zenith.webapp.auth.enums.UserRole;
 import com.zenith.webapp.auth.model.User;
 import com.zenith.webapp.auth.repository.UserRepository;
+import com.zenith.webapp.notification.dto.request.CreateNotificationRequest;
+import com.zenith.webapp.notification.enums.NotificationType;
+import com.zenith.webapp.notification.service.NotificationService;
 import com.zenith.webapp.ticket.dto.request.AssignTicketRequest;
 import com.zenith.webapp.ticket.dto.request.CreateCommentRequest;
 import com.zenith.webapp.ticket.dto.request.CreateTicketRequest;
@@ -46,6 +49,7 @@ public class TicketServiceImpl implements TicketService {
     private final TicketAttachmentRepository attachmentRepository;
     private final TicketCommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Value("${app.ticket.upload-dir:uploads/tickets}")
     private String uploadBaseDir;
@@ -87,6 +91,7 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public TicketResponse updateStatus(Long ticketId, UpdateTicketStatusRequest request, Long actorUserId, String actorRole) {
         Ticket ticket = getTicketOrThrow(ticketId);
+        TicketStatus previousStatus = ticket.getStatus();
 
         boolean isAdminLike = isAdminLike(actorRole);
         boolean isPrimaryAdmin = isPrimaryAdmin(actorRole);
@@ -128,6 +133,9 @@ public class TicketServiceImpl implements TicketService {
         }
 
         Ticket updated = ticketRepository.save(ticket);
+
+        notifyTicketStatusChanged(updated, previousStatus);
+
         return toTicketResponse(updated);
     }
 
@@ -245,6 +253,9 @@ public class TicketServiceImpl implements TicketService {
                 .build();
 
         TicketComment saved = commentRepository.save(comment);
+
+        notifyNewComment(ticket, saved, actorUserId);
+
         return toCommentResponse(saved);
     }
 
@@ -383,6 +394,46 @@ public class TicketServiceImpl implements TicketService {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private void notifyTicketStatusChanged(Ticket ticket, TicketStatus previousStatus) {
+        try {
+            CreateNotificationRequest notification = new CreateNotificationRequest();
+            notification.setRecipientId(ticket.getRequesterId());
+            notification.setType(NotificationType.TICKET_STATUS_CHANGED);
+            notification.setReferenceId(ticket.getId());
+            notification.setMessage(
+                    "Ticket #" + ticket.getId() + " status changed from " + previousStatus + " to " + ticket.getStatus() + "."
+            );
+            notificationService.createNotification(notification);
+        } catch (Exception ignored) {
+            // Notification delivery should not block ticket updates.
+        }
+    }
+
+    private void notifyNewComment(Ticket ticket, TicketComment comment, Long actorUserId) {
+        if (ticket.getRequesterId().equals(actorUserId)) {
+            return;
+        }
+
+        try {
+            CreateNotificationRequest notification = new CreateNotificationRequest();
+            notification.setRecipientId(ticket.getRequesterId());
+            notification.setType(NotificationType.NEW_COMMENT);
+            notification.setReferenceId(ticket.getId());
+            notification.setMessage(
+                    "New comment on your ticket #" + ticket.getId() + ": " + shorten(comment.getContent(), 120)
+            );
+            notificationService.createNotification(notification);
+        } catch (Exception ignored) {
+            // Notification delivery should not block comment creation.
+        }
+    }
+
+    private String shorten(String text, int max) {
+        if (text == null) return "";
+        if (text.length() <= max) return text;
+        return text.substring(0, max) + "...";
     }
 
 

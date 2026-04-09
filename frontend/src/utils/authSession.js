@@ -3,6 +3,11 @@ export function getCurrentRole() {
   return (localStorage.getItem("role") || "USER").toUpperCase();
 }
 
+export function getCurrentUserId() {
+  const parsed = Number(localStorage.getItem("userId"));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export function isAdminRole() {
   return getCurrentRole() === "ADMIN";
 }

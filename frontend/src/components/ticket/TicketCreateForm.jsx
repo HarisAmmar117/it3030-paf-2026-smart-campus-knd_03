@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createTicket } from "../../api/ticketApi";
+import { getCurrentUserId } from "../../utils/authSession";
 import "./TicketCreateForm.css";
 
 const CATEGORIES = [
@@ -65,7 +66,12 @@ export default function TicketCreateForm() {
     setSuccess("");
 
     try {
-      const created = await createTicket(form, 101);
+      const currentUserId = getCurrentUserId();
+      if (!currentUserId) {
+        throw new Error("User session not found. Please log in again.");
+      }
+
+      const created = await createTicket(form, currentUserId);
       setSuccess(`Ticket #${created.id} created successfully!`);
       setForm(initialForm);
       setTimeout(() => setSuccess(""), 4000);
