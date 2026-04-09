@@ -58,6 +58,7 @@ function App() {
           <Route path="/tickets" element={<TicketLayout />}>
             <Route index element={<TicketListPage />} />
             <Route path="create" element={<TicketCreatePage />} />
+            <Route path="admin" element={<AdminTicketPage />} />
             {/* <Route path=":id" element={<TicketDetailPage />} /> */}
           </Route>
 
