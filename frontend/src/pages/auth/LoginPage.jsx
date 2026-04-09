@@ -36,16 +36,22 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.message || data?.error || "Login failed");
 
+      // Store user data in localStorage
       localStorage.setItem("token", data.token || "");
       localStorage.setItem("userId", String(data.id));
       localStorage.setItem("role", String(data.role || "USER"));
       localStorage.setItem("userName", String(data.name || ""));
       localStorage.setItem("userEmail", String(data.email || ""));
 
-      if (["ADMIN", "SUPPORT_STAFF"].includes(String(data.role).toUpperCase())) {
+      const userRole = String(data.role).toUpperCase();
+      
+      // Redirect based on role
+      if (userRole === "ADMIN" || userRole === "SUPPORT_STAFF") {
+        // Admin/Support Staff → Tickets Admin Panel
         navigate("/tickets/admin", { replace: true });
       } else {
-        navigate("/tickets", { replace: true });
+        // Normal User → Home Page
+        navigate("/", { replace: true });
       }
     } catch (err) {
       setError(err.message || "Invalid credentials");

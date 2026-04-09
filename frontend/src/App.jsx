@@ -22,7 +22,6 @@ import FacilityLayout from "./pages/facility/FacilityLayout";
 import FacilityListPage from "./pages/facility/FacilityListPage";
 import FacilityCreatePage from "./pages/facility/FacilityCreatePage";
 import FacilityEditPage from "./pages/facility/FacilityEditPage";
-import UserFacilityPage from "./pages/facility/UserFacilityPage";
 
 // ========================
 // MEMBER 2 — Booking Pages
@@ -159,9 +158,6 @@ function App() {
             <Route path="add" element={<FacilityCreatePage />} />
             <Route path="edit/:id" element={<FacilityEditPage />} />
           </Route>
-          <Route path="/user-facilities" element={<FacilityLayout />}>
-            <Route index element={<UserFacilityPage />} />
-          </Route>
 
           {/* ====== MEMBER 2 — Bookings ====== */}
           <Route 
@@ -182,13 +178,13 @@ function App() {
               } 
             />
             
-            {/* Create booking - only regular users */}
+            {/* Create booking - accessible to BOTH Admin AND Regular Users */}
             <Route 
               path="create" 
               element={
-                <RequireUser>
+                <RequireAuth>
                   <BookingCreatePage />
-                </RequireUser>
+                </RequireAuth>
               } 
             />
             

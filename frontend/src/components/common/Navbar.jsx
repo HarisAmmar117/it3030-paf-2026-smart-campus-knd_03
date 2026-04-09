@@ -2,22 +2,16 @@ import { NavLink } from "react-router-dom";
 import { useState, useEffect, useRef, useCallback } from "react";
 import "./Navbar.css";
 import logo from "../../../public/zenith-logo.png";
-import { getCurrentRole, isAdminOrSupport, isUserRole } from "../../utils/authSession";
+import { 
+  getCurrentRole, 
+  isAdminOrSupport, 
+  isUserRole,
+  getCurrentUserId
+} from "../../utils/authSession";
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from "../../api/notificationApi";
 
-// Base links that are common for all users
-const BASE_LINKS = [
-  { 
-    to: "/", 
-    label: "Home", 
-    icon: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-        <polyline points="9 22 9 12 15 12 15 22" />
-      </svg>
-    ),
-    end: true
-  },
+// Core management links (shown to all logged-in users)
+const MANAGEMENT_LINKS = [
   { 
     to: "/tickets", 
     label: "Tickets", 
@@ -48,6 +42,21 @@ const BASE_LINKS = [
       </svg>
     )
   },
+];
+
+// Public links (Home & About) - shown to non-authenticated users AND regular users
+const PUBLIC_LINKS = [
+  { 
+    to: "/", 
+    label: "Home", 
+    icon: () => (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+      </svg>
+    ),
+    end: true
+  },
   { 
     to: "/about", 
     label: "About", 
@@ -62,12 +71,11 @@ const BASE_LINKS = [
 
 // Get role-based booking links
 const getBookingLinks = () => {
-  const role = getCurrentRole();
   const isAdminOrSupportUser = isAdminOrSupport();
   const isRegularUser = isUserRole();
 
   if (isAdminOrSupportUser) {
-    // Admin/Support sees all bookings management
+    // Admin/Support sees: All Bookings
     return [
       { 
         to: "/bookings", 
@@ -84,7 +92,7 @@ const getBookingLinks = () => {
       }
     ];
   } else if (isRegularUser) {
-    // Regular user sees their own bookings and create booking
+    // Regular user sees: My Bookings + Create Booking
     return [
       { 
         to: "/bookings/my-bookings", 
@@ -98,11 +106,30 @@ const getBookingLinks = () => {
             <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
           </svg>
         )
-      },
+      }
     ];
   }
   
   return [];
+};
+
+// Get navbar links based on authentication status and role
+const getNavLinks = (isLoggedIn) => {
+  if (!isLoggedIn) {
+    // Non-authenticated users: Home + About only
+    return PUBLIC_LINKS;
+  }
+  
+  const isRegularUser = isUserRole();
+  const bookingLinks = getBookingLinks();
+  
+  if (isRegularUser) {
+    // Regular users: Home + About + Management Links + Booking Links
+    return [...PUBLIC_LINKS, ...MANAGEMENT_LINKS, ...bookingLinks];
+  } else {
+    // Admin/Support users: Management Links + Booking Links (NO Home/About)
+    return [...MANAGEMENT_LINKS, ...bookingLinks];
+  }
 };
 
 export default function Navbar() {
@@ -125,9 +152,8 @@ export default function Navbar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const notificationRef = useRef(null);
 
-  // Build dynamic navigation links based on role
-  const bookingLinks = getBookingLinks();
-  const MODULE_LINKS = [...BASE_LINKS, ...bookingLinks];
+  // Build dynamic navigation links based on authentication status and role
+  const MODULE_LINKS = getNavLinks(isLoggedIn);
 
   const fetchNotifications = useCallback(async () => {
     if (!userId) return;
@@ -246,11 +272,7 @@ export default function Navbar() {
     window.location.href = "/login";
   };
 
-  const visibleLinks = MODULE_LINKS.filter((item) => {
-    if (item.to === "/" || item.to === "/about") return true;
-    if (!isLoggedIn) return false;
-    return true;
-  });
+  const visibleLinks = MODULE_LINKS;
 
   return (
     <>
@@ -289,7 +311,7 @@ export default function Navbar() {
 
           {/* Right Section */}
           <div className="navbar-right">
-            {/* Theme Toggle with Sun/Moon Icons */}
+            {/* Theme Toggle */}
             <button onClick={toggleTheme} className="theme-toggle-btn" aria-label="Toggle theme">
               {isDark ? (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

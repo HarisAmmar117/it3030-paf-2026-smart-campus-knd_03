@@ -53,7 +53,7 @@
 .user-bookings-container {
   min-height: calc(100vh - 200px);
   padding: 24px;
-  background: var(--bg-primary);
+
 }
 
 .user-bookings-card {
