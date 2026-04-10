@@ -27,6 +27,8 @@ public class TicketResponse {
     private int attachmentCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime firstResponseAt;
+    private LocalDateTime resolvedAt;
 }
 
 

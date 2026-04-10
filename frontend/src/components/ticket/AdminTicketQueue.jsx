@@ -7,6 +7,7 @@ import {
   getUsers,
 } from "../../api/ticketApi";
 import { getCurrentRole, isAdminRole } from "../../utils/authSession";
+import { formatDuration, getSlaStatusLabel } from "../../utils/slaTimer";
 import CommentSection from "./CommentSection";
 import AttachmentSection from "./AttachmentSection";
 import "./AdminTicketQueue.css";
@@ -68,7 +69,7 @@ export default function AdminTicketQueue() {
 
   const canPickStatus = (status) => {
     if (actorRole !== "SUPPORT_STAFF") return true;
-    return status !== "IN_PROGRESS" && status !== "RESOLVED";
+    return status !== "REJECTED";
   };
 
   const loadTickets = useCallback(async () => {
@@ -320,6 +321,11 @@ export default function AdminTicketQueue() {
           const isLoading = actionLoading[t.id];
           const currentAction = statusActions[t.id];
           const isAssignLocked = t.status === "RESOLVED" || t.status === "CLOSED";
+          const isSupportAssignee =
+            actorRole === "SUPPORT_STAFF" &&
+            t.assigneeId != null &&
+            Number(t.assigneeId) === Number(actorUserId);
+          const canUpdateStatusSection = actorRole !== "SUPPORT_STAFF" || isSupportAssignee;
 
           return (
             <article className={`admin-ticket ${isExpanded ? "admin-ticket-expanded" : ""}`} key={t.id}>
@@ -358,6 +364,18 @@ export default function AdminTicketQueue() {
                       <div><strong>Contact:</strong> {t.preferredContactDetails}</div>
                       <div><strong>Created:</strong> {new Date(t.createdAt).toLocaleString()}</div>
                       <div><strong>Updated:</strong> {new Date(t.updatedAt).toLocaleString()}</div>
+                    </div>
+                    <div className="admin-sla-grid">
+                      <div className="admin-sla-item">
+                        <span className="admin-sla-label">First Response</span>
+                        <strong>{formatDuration(t.createdAt, t.firstResponseAt)}</strong>
+                        <small>{getSlaStatusLabel(t)}</small>
+                      </div>
+                      <div className="admin-sla-item">
+                        <span className="admin-sla-label">Resolution Time</span>
+                        <strong>{formatDuration(t.createdAt, t.resolvedAt)}</strong>
+                        <small>{t.resolvedAt ? "Resolved" : "Pending resolution"}</small>
+                      </div>
                     </div>
                     {t.resolutionNotes && (
                       <div className="admin-notes-box admin-notes-resolved">
@@ -426,7 +444,7 @@ export default function AdminTicketQueue() {
                   )}
 
                   {/* ====== STATUS SECTION ====== */}
-                  {transitions.length > 0 && (
+                  {transitions.length > 0 && canUpdateStatusSection && (
                     <div className="admin-action-section">
                       <h4>📋 Update Status</h4>
                       <div className="admin-status-btns">
@@ -495,6 +513,15 @@ export default function AdminTicketQueue() {
                           </button>
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {actorRole === "SUPPORT_STAFF" && !isSupportAssignee && transitions.length > 0 && (
+                    <div className="admin-action-section">
+                      <h4>📋 Update Status</h4>
+                      <small className="admin-assign-hint">
+                        Status update is available only when this ticket is assigned to you.
+                      </small>
                     </div>
                   )}
 

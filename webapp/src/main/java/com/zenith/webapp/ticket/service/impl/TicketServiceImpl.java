@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -99,21 +100,16 @@ public class TicketServiceImpl implements TicketService {
         Ticket ticket = getTicketOrThrow(ticketId);
         TicketStatus previousStatus = ticket.getStatus();
 
-        boolean isAdminLike = isAdminLike(actorRole);
         boolean isPrimaryAdmin = isPrimaryAdmin(actorRole);
         boolean isSupportStaff = isSupportStaff(actorRole);
         boolean isAssignee = ticket.getAssigneeId() != null && ticket.getAssigneeId().equals(actorUserId);
 
-        if (!isAdminLike && !isAssignee) {
+        if (!isPrimaryAdmin && !isSupportStaff && !isAssignee) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only assignee or admin can update status");
         }
 
-        if (isSupportStaff &&
-                (request.getStatus() == TicketStatus.IN_PROGRESS || request.getStatus() == TicketStatus.RESOLVED)) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Support staff cannot change ticket status to IN_PROGRESS or RESOLVED"
-            );
+        if (isSupportStaff && !isAssignee) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Support staff can update status only for assigned tickets");
         }
 
         validateTransition(ticket.getStatus(), request.getStatus(), isPrimaryAdmin);
@@ -132,7 +128,15 @@ public class TicketServiceImpl implements TicketService {
             ticket.setRejectionReason(request.getRejectionReason());
         }
 
+        if (ticket.getFirstResponseAt() == null && request.getStatus() != TicketStatus.OPEN) {
+            ticket.setFirstResponseAt(LocalDateTime.now());
+        }
+
         ticket.setStatus(request.getStatus());
+
+        if (request.getStatus() == TicketStatus.RESOLVED && ticket.getResolvedAt() == null) {
+            ticket.setResolvedAt(LocalDateTime.now());
+        }
 
         if (!isBlank(request.getResolutionNotes())) {
             ticket.setResolutionNotes(request.getResolutionNotes());
@@ -260,6 +264,11 @@ public class TicketServiceImpl implements TicketService {
 
         TicketComment saved = commentRepository.save(comment);
 
+        if (!ticket.getRequesterId().equals(actorUserId) && ticket.getFirstResponseAt() == null) {
+            ticket.setFirstResponseAt(LocalDateTime.now());
+            ticketRepository.save(ticket);
+        }
+
         notifyNewComment(ticket, saved, actorUserId);
 
         return toCommentResponse(saved);
@@ -362,6 +371,8 @@ public class TicketServiceImpl implements TicketService {
                 .attachmentCount((int) attachmentRepository.countByTicketId(ticket.getId()))
                 .createdAt(ticket.getCreatedAt())
                 .updatedAt(ticket.getUpdatedAt())
+                .firstResponseAt(ticket.getFirstResponseAt())
+                .resolvedAt(ticket.getResolvedAt())
                 .build();
     }
 
