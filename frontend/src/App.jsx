@@ -36,6 +36,7 @@ import UserBookingsPage from "./pages/booking/UserBookingsPage";
 // ========================
 import NotificationLayout from "./pages/notification/NotificationLayout";
 import NotificationListPage from "./pages/notification/NotificationListPage";
+import UserNotificationPage from "./pages/notification/UserNotificationPage";
 
 // ========================
 // PUBLIC PAGES
@@ -139,33 +140,47 @@ function App() {
                 </RequireUser>
               }
             />
-            <Route 
-              path="admin" 
+            <Route
+              path="admin"
               element={
                 <RequireAdmin redirectTo="/tickets">
                   <AdminTicketPage />
                 </RequireAdmin>
-              } 
+              }
             />
           </Route>
 
           {/* ====== MEMBER 1 — Facilities ====== */}
-          <Route 
-            path="/facilities" 
+          <Route
+            path="/facilities"
             element={
               <RequireAuth>
-                <FacilityLayout /> 
+                <FacilityLayout />
               </RequireAuth>
             }
           >
             <Route index element={<FacilityListPage />} />
-            <Route path="add" element={<FacilityCreatePage />} />
-            <Route path="edit/:id" element={<FacilityEditPage />} />
+            <Route 
+              path="add" 
+              element={
+                <RequireAdminOrSupport>
+                  <FacilityCreatePage />
+                </RequireAdminOrSupport>
+              } 
+            />
+            <Route 
+              path="edit/:id" 
+              element={
+                <RequireAdminOrSupport>
+                  <FacilityEditPage />
+                </RequireAdminOrSupport>
+              } 
+            />
           </Route>
 
           {/* ====== MEMBER 2 — Bookings ====== */}
-          <Route 
-            path="/bookings" 
+          <Route
+            path="/bookings"
             element={
               <RequireAuth>
                 <BookingLayout />
@@ -173,39 +188,39 @@ function App() {
             }
           >
             {/* Admin/Support Staff view - all bookings */}
-            <Route 
-              index 
+            <Route
+              index
               element={
                 <RequireAdminOrSupport>
                   <BookingListPage />
                 </RequireAdminOrSupport>
-              } 
+              }
             />
-            
+
             {/* Create booking - accessible to BOTH Admin AND Regular Users */}
-            <Route 
-              path="create" 
+            <Route
+              path="create"
               element={
                 <RequireAuth>
                   <BookingCreatePage />
                 </RequireAuth>
-              } 
+              }
             />
-            
+
             {/* User's own bookings view - only regular users */}
-            <Route 
-              path="my-bookings" 
+            <Route
+              path="my-bookings"
               element={
                 <RequireUser>
                   <UserBookingsPage />
                 </RequireUser>
-              } 
+              }
             />
           </Route>
 
           {/* ====== MEMBER 4 — Notifications ====== */}
-          <Route 
-            path="/notifications" 
+          <Route
+            path="/notifications"
             element={
               <RequireAuth>
                 <NotificationLayout />
@@ -214,6 +229,18 @@ function App() {
           >
             <Route index element={<NotificationListPage />} />
           </Route>
+
+          {/* User-only notification page (accessed via bell icon dropdown) */}
+          <Route
+            path="/user-notifications"
+            element={
+              <RequireAuth>
+                <RequireUser>
+                  <UserNotificationPage />
+                </RequireUser>
+              </RequireAuth>
+            }
+          />
 
           {/* Auth Route */}
           <Route

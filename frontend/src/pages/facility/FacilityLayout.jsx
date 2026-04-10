@@ -1,5 +1,6 @@
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { isUserRole } from "../../utils/authSession";
 import "./FacilityLayout.css";
 
 const FACILITY_TABS = [
@@ -45,11 +46,9 @@ export default function FacilityLayout() {
 
   const toggleTheme = () => setIsDark(!isDark);
 
-  const location = useLocation();
-  const isUserRoute = location.pathname.startsWith('/user-facilities');
-  const tabsToDisplay = isUserRoute 
+  const tabsToDisplay = isUserRole() 
     ? [{ 
-        to: "/user-facilities", 
+        to: "/facilities", 
         label: "View Resources", 
         end: true,
         icon: FACILITY_TABS[0].icon

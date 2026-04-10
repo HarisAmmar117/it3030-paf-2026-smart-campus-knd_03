@@ -4,6 +4,7 @@ import {
   addComment,
   updateComment,
   deleteComment,
+  getUsers,
 } from "../../api/ticketApi";
 import "./CommentSection.css";
 
@@ -18,6 +19,7 @@ export default function CommentSection({ ticketId, currentUserId }) {
   const [editingId, setEditingId] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
+  const [authorRoleById, setAuthorRoleById] = useState({});
 
   const loadComments = useCallback(async () => {
     setLoading(true);
@@ -35,6 +37,26 @@ export default function CommentSection({ ticketId, currentUserId }) {
   useEffect(() => {
     loadComments();
   }, [loadComments]);
+
+  const loadAuthorRoles = useCallback(async () => {
+    try {
+      const users = await getUsers();
+      const roleMap = {};
+      users.forEach((u) => {
+        const id = Number(u.user_id ?? u.id);
+        if (!Number.isNaN(id)) {
+          roleMap[id] = String(u.role || "USER").toUpperCase();
+        }
+      });
+      setAuthorRoleById(roleMap);
+    } catch {
+      setAuthorRoleById({});
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAuthorRoles();
+  }, [loadAuthorRoles]);
 
   // Add comment
   const handleAddComment = async (e) => {
@@ -117,6 +139,11 @@ export default function CommentSection({ ticketId, currentUserId }) {
     return d.toLocaleDateString();
   };
 
+  const getAuthorRoleLabel = (authorId) => {
+    const role = String(authorRoleById[Number(authorId)] || "USER").toUpperCase();
+    return role.replace(/_/g, "-");
+  };
+
   return (
     <div className="comment-section">
       {/* Header */}
@@ -189,7 +216,7 @@ export default function CommentSection({ ticketId, currentUserId }) {
               <div className="comment-body">
                 <div className="comment-meta">
                   <span className="comment-author">
-                    {isOwner ? "You" : `User ${c.authorId}`}
+                    {getAuthorRoleLabel(c.authorId)}
                   </span>
                   <span className="comment-time">
                     {formatTime(c.createdAt)}
@@ -288,11 +315,13 @@ export default function CommentSection({ ticketId, currentUserId }) {
           type="submit"
           className="comment-submit"
           disabled={submitting || !newComment.trim()}
+          title="Send comment"
+          aria-label="Send comment"
         >
           {submitting ? (
             <span className="spinner-small" />
           ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg className="comment-submit-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <line x1="22" y1="2" x2="11" y2="13" />
               <polygon points="22 2 15 22 11 13 2 9 22 2" />
             </svg>

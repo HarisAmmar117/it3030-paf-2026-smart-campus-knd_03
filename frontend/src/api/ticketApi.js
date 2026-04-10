@@ -357,3 +357,14 @@ export async function registerSupportStaff(payload, role = "ADMIN") {
 
   return data;
 }
+
+export async function getUsers() {
+  const response = await fetch(`${BASE_URL}/api/users`);
+  const data = await response.json().catch(() => []);
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to fetch users";
+    throw new Error(message);
+  }
+  return Array.isArray(data) ? data : [];
+}

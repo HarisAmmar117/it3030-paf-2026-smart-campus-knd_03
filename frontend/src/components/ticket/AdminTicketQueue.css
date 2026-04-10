@@ -436,6 +436,41 @@
   color: var(--text-secondary);
 }
 
+.admin-sla-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.admin-sla-item {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-sla-item strong {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.admin-sla-item small {
+  color: var(--text-tertiary);
+  font-size: 0.74rem;
+}
+
+.admin-sla-label {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
 /* Notes boxes */
 .admin-notes-box {
   margin-top: 12px;
@@ -495,6 +530,44 @@
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.admin-assign-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.74rem;
+  color: var(--text-tertiary);
+}
+
+.admin-busy-staff {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: var(--bg-tertiary);
+}
+
+.admin-busy-title {
+  margin-bottom: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.admin-busy-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+  border-top: 1px dashed var(--border-light);
+  font-size: 0.76rem;
+  color: var(--text-tertiary);
+}
+
+.admin-busy-item:first-of-type {
+  border-top: none;
 }
 
 /* ========== ACTION BUTTONS ========== */

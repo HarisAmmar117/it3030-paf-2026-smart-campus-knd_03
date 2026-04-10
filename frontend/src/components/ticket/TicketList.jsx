@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { deleteTicket, getTickets, updateTicket } from "../../api/ticketApi";
 import { getCurrentUserId } from "../../utils/authSession";
+import { formatDuration, getSlaStatusLabel } from "../../utils/slaTimer";
 import CommentSection from "./CommentSection";
 import AttachmentSection from "./AttachmentSection";
 import "./TicketList.css";
@@ -312,6 +313,19 @@ export default function TicketList() {
                         <line x1="3" y1="10" x2="21" y2="10" />
                       </svg>
                       <small>Updated: {new Date(t.updatedAt).toLocaleString()}</small>
+                    </div>
+                  </div>
+
+                  <div className="ticket-sla-row">
+                    <div className="ticket-sla-box">
+                      <span>First Response</span>
+                      <strong>{formatDuration(t.createdAt, t.firstResponseAt)}</strong>
+                      <small>{getSlaStatusLabel(t)}</small>
+                    </div>
+                    <div className="ticket-sla-box">
+                      <span>Resolution Time</span>
+                      <strong>{formatDuration(t.createdAt, t.resolvedAt)}</strong>
+                      <small>{t.resolvedAt ? "Resolved" : "Pending resolution"}</small>
                     </div>
                   </div>
 
