@@ -155,8 +155,22 @@ function App() {
             }
           >
             <Route index element={<FacilityListPage />} />
-            <Route path="add" element={<FacilityCreatePage />} />
-            <Route path="edit/:id" element={<FacilityEditPage />} />
+            <Route 
+              path="add" 
+              element={
+                <RequireAdminOrSupport>
+                  <FacilityCreatePage />
+                </RequireAdminOrSupport>
+              } 
+            />
+            <Route 
+              path="edit/:id" 
+              element={
+                <RequireAdminOrSupport>
+                  <FacilityEditPage />
+                </RequireAdminOrSupport>
+              } 
+            />
           </Route>
 
           {/* ====== MEMBER 2 — Bookings ====== */}

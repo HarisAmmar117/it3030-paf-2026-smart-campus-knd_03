@@ -10,7 +10,7 @@ const ResourceList = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [resources, setResources] = useState([]);
-    const [filters, setFilters] = useState({ type: '' });
+    const [filters, setFilters] = useState({ type: '', location: '', minCapacity: '' });
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -64,13 +64,32 @@ const ResourceList = () => {
     };
 
     const filteredResources = resources.filter((r) => {
-        if (!searchQuery) return true;
-        const q = searchQuery.toLowerCase();
-        return (
-            r.name?.toLowerCase().includes(q) ||
-            r.location?.toLowerCase().includes(q) ||
-            r.availabilityWindow?.toLowerCase().includes(q)
-        );
+        // Location filter (exact or partial text march, separate from general search)
+        if (filters.location) {
+            const locQuery = filters.location.toLowerCase();
+            if (!r.location || !r.location.toLowerCase().includes(locQuery)) return false;
+        }
+
+        // Capacity filter (covers both capacities for rooms and quantities for eqp)
+        if (filters.minCapacity) {
+            const threshold = parseInt(filters.minCapacity, 10);
+            if (!isNaN(threshold)) {
+                const currentCap = r.type === 'EQUIPMENT' ? (r.quantity || 0) : (r.capacity || 0);
+                if (currentCap < threshold) return false;
+            }
+        }
+
+        // General search filter
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            const matchesSearch =
+                r.name?.toLowerCase().includes(q) ||
+                r.location?.toLowerCase().includes(q) ||
+                r.availabilityWindow?.toLowerCase().includes(q);
+            if (!matchesSearch) return false;
+        }
+
+        return true;
     });
 
     return (
@@ -116,7 +135,7 @@ const ResourceList = () => {
                     </label>
                     <input
                         type="text"
-                        placeholder="Search by name or location..."
+                        placeholder="Search by name"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -134,6 +153,41 @@ const ResourceList = () => {
                             <option key={t || 'ALL'} value={t}>{t || 'ALL'}</option>
                         ))}
                     </select>
+                </div>
+                <div className="filter-group">
+                    <label>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        Location
+                    </label>
+                    <input
+                        type="text"
+                        name="location"
+                        placeholder="e.g. Floor 4"
+                        value={filters.location}
+                        onChange={handleFilterChange}
+                    />
+                </div>
+                <div className="filter-group">
+                    <label>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                        Min Capacity
+                    </label>
+                    <input
+                        type="number"
+                        name="minCapacity"
+                        placeholder="e.g. 10"
+                        min="0"
+                        value={filters.minCapacity}
+                        onChange={handleFilterChange}
+                    />
                 </div>
                 <div className="filter-actions">
                     <button type="submit" className="apply-btn" disabled={loading}>
@@ -191,11 +245,11 @@ const ResourceList = () => {
             {!loading && (
                 <div className="resource-grid">
                     {filteredResources.map((resource) => (
-                        <ResourceCard 
-                            key={resource.id} 
-                            resource={resource} 
-                            isAdmin={true} 
-                            onDelete={handleDelete} 
+                        <ResourceCard
+                            key={resource.id}
+                            resource={resource}
+                            isAdmin={true}
+                            onDelete={handleDelete}
                         />
                     ))}
                 </div>
