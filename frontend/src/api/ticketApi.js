@@ -359,7 +359,9 @@ export async function registerSupportStaff(payload, role = "ADMIN") {
 }
 
 export async function getUsers() {
-  const response = await fetch(`${BASE_URL}/api/users`);
+  const response = await request(`${BASE_URL}/api/users`, {
+    method: "GET",
+  });
   const data = await response.json().catch(() => []);
   if (!response.ok) {
     const message =
