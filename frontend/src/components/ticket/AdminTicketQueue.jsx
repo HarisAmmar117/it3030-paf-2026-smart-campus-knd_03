@@ -7,6 +7,7 @@ import {
   getUsers,
 } from "../../api/ticketApi";
 import { getCurrentRole, isAdminRole } from "../../utils/authSession";
+import { formatDuration, getSlaStatusLabel } from "../../utils/slaTimer";
 import CommentSection from "./CommentSection";
 import AttachmentSection from "./AttachmentSection";
 import "./AdminTicketQueue.css";
@@ -358,6 +359,18 @@ export default function AdminTicketQueue() {
                       <div><strong>Contact:</strong> {t.preferredContactDetails}</div>
                       <div><strong>Created:</strong> {new Date(t.createdAt).toLocaleString()}</div>
                       <div><strong>Updated:</strong> {new Date(t.updatedAt).toLocaleString()}</div>
+                    </div>
+                    <div className="admin-sla-grid">
+                      <div className="admin-sla-item">
+                        <span className="admin-sla-label">First Response</span>
+                        <strong>{formatDuration(t.createdAt, t.firstResponseAt)}</strong>
+                        <small>{getSlaStatusLabel(t)}</small>
+                      </div>
+                      <div className="admin-sla-item">
+                        <span className="admin-sla-label">Resolution Time</span>
+                        <strong>{formatDuration(t.createdAt, t.resolvedAt)}</strong>
+                        <small>{t.resolvedAt ? "Resolved" : "Pending resolution"}</small>
+                      </div>
                     </div>
                     {t.resolutionNotes && (
                       <div className="admin-notes-box admin-notes-resolved">

@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -132,7 +133,15 @@ public class TicketServiceImpl implements TicketService {
             ticket.setRejectionReason(request.getRejectionReason());
         }
 
+        if (ticket.getFirstResponseAt() == null && request.getStatus() != TicketStatus.OPEN) {
+            ticket.setFirstResponseAt(LocalDateTime.now());
+        }
+
         ticket.setStatus(request.getStatus());
+
+        if (request.getStatus() == TicketStatus.RESOLVED && ticket.getResolvedAt() == null) {
+            ticket.setResolvedAt(LocalDateTime.now());
+        }
 
         if (!isBlank(request.getResolutionNotes())) {
             ticket.setResolutionNotes(request.getResolutionNotes());
@@ -260,6 +269,11 @@ public class TicketServiceImpl implements TicketService {
 
         TicketComment saved = commentRepository.save(comment);
 
+        if (!ticket.getRequesterId().equals(actorUserId) && ticket.getFirstResponseAt() == null) {
+            ticket.setFirstResponseAt(LocalDateTime.now());
+            ticketRepository.save(ticket);
+        }
+
         notifyNewComment(ticket, saved, actorUserId);
 
         return toCommentResponse(saved);
@@ -362,6 +376,8 @@ public class TicketServiceImpl implements TicketService {
                 .attachmentCount((int) attachmentRepository.countByTicketId(ticket.getId()))
                 .createdAt(ticket.getCreatedAt())
                 .updatedAt(ticket.getUpdatedAt())
+                .firstResponseAt(ticket.getFirstResponseAt())
+                .resolvedAt(ticket.getResolvedAt())
                 .build();
     }
 

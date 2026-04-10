@@ -374,6 +374,41 @@
   font-size: 0.7rem;
 }
 
+.ticket-sla-row {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ticket-sla-box {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ticket-sla-box span {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.ticket-sla-box strong {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.ticket-sla-box small {
+  color: var(--text-tertiary);
+  font-size: 0.72rem;
+}
+
 /* ========== STATUS BADGES ========== */
 .badge {
   display: inline-block;
@@ -677,6 +712,10 @@
   }
 
   .ticket-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-sla-row {
     grid-template-columns: 1fr;
   }
 
