@@ -93,29 +93,81 @@ export default function BookingList() {
     }
   }, [success]);
 
+  // Get max attendees for a resource
+  const getMaxAttendees = (resourceId) => {
+    const resource = resources.find(r => r.id === resourceId);
+    if (!resource) return 100;
+    // For EQUIPMENT type, use quantity, otherwise use capacity
+    return resource.type === 'EQUIPMENT' ? resource.quantity : resource.capacity;
+  };
+
+  // Get capacity info display
+  const getCapacityInfo = (resourceId) => {
+    const resource = resources.find(r => r.id === resourceId);
+    if (!resource) return "";
+    if (resource.type === 'EQUIPMENT') {
+      return `Max ${resource.quantity} units`;
+    }
+    return `Max ${resource.capacity} people`;
+  };
+
+  // Validate attendees against resource capacity
+  const validateAttendees = (resourceId, attendees) => {
+    const maxAttendees = getMaxAttendees(resourceId);
+    if (attendees > maxAttendees) {
+      const resource = resources.find(r => r.id === resourceId);
+      const type = resource?.type === 'EQUIPMENT' ? 'units' : 'people';
+      setError(`Attendees cannot exceed ${maxAttendees} ${type}. Please reduce the number.`);
+      return false;
+    }
+    return true;
+  };
+
   const onStartUpdate = (booking) => {
     setEditBookingId(booking.bookingId);
     setEditForm({
       resourceId: booking.resourceId,
-      startTime: booking.startTime?.slice(0, 16) || "",
-      endTime: booking.endTime?.slice(0, 16) || "",
+      startTime: booking.startTime,
+      endTime: booking.endTime,
       attendees: booking.attendees,
       status: booking.status,
     });
+    // Clear any previous errors
+    setError("");
   };
 
   const onEditChange = (e) => {
     const { name, value } = e.target;
     setEditForm((prev) => ({ ...prev, [name]: value }));
+    
+    // Clear error when user changes attendees
+    if (name === "attendees") {
+      setError("");
+    }
   };
 
   const onSaveUpdate = async (e) => {
     e.preventDefault();
     if (!editBookingId || !editForm) return;
+    
+    // Validate attendees against resource capacity
+    if (!validateAttendees(editForm.resourceId, Number(editForm.attendees))) {
+      return;
+    }
+    
     setSavingEdit(true);
     setError("");
     try {
-      await updateBooking(editBookingId, editForm);
+      // Send all fields including existing startTime and endTime
+      const payload = {
+        resourceId: Number(editForm.resourceId),
+        startTime: editForm.startTime,
+        endTime: editForm.endTime,
+        attendees: Number(editForm.attendees),
+        purpose: editForm.purpose,
+        status: editForm.status,
+      };
+      await updateBooking(editBookingId, payload);
       setSuccess("Booking updated successfully!");
       setEditBookingId(null);
       setEditForm(null);
@@ -130,6 +182,7 @@ export default function BookingList() {
   const onCancelUpdate = () => {
     setEditBookingId(null);
     setEditForm(null);
+    setError("");
   };
 
   const onDeleteBooking = async (bookingId) => {
@@ -187,11 +240,31 @@ export default function BookingList() {
     return resource?.name || `Resource #${resourceId}`;
   };
 
+  // Get current max attendees for the selected resource in edit form
+  const currentMaxAttendees = editForm ? getMaxAttendees(editForm.resourceId) : 100;
+  const currentCapacityInfo = editForm ? getCapacityInfo(editForm.resourceId) : "";
+
   return (
     <div className="booking-list-container">
       <div className="booking-list-card">
         {/* Theme Toggle */}
-
+        <button onClick={toggleTheme} className="global-theme-toggle" aria-label="Toggle theme">
+          {isDark ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+            </svg>
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          )}
+        </button>
 
         {/* Header */}
         <div className="list-header">
@@ -393,7 +466,7 @@ export default function BookingList() {
           )}
         </div>
 
-        {/* Edit Modal */}
+        {/* Edit Modal - With capacity validation */}
         {editBookingId && editForm && (
           <div className="modal-overlay" onClick={onCancelUpdate}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -404,10 +477,33 @@ export default function BookingList() {
                     <path d="M4 20h16" />
                   </svg>
                 </div>
-                <h2>Edit booking</h2>
+                <h2>Edit Booking</h2>
                 <button className="modal-close" onClick={onCancelUpdate}>×</button>
               </div>
               <form onSubmit={onSaveUpdate} className="edit-form">
+                {/* Read-only display of Start Time */}
+                <div className="form-group">
+                  <label>Start Time (Read Only)</label>
+                  <input 
+                    type="text" 
+                    value={new Date(editForm.startTime).toLocaleString()} 
+                    disabled 
+                    className="readonly-field"
+                  />
+                </div>
+
+                {/* Read-only display of End Time */}
+                <div className="form-group">
+                  <label>End Time (Read Only)</label>
+                  <input 
+                    type="text" 
+                    value={new Date(editForm.endTime).toLocaleString()} 
+                    disabled 
+                    className="readonly-field"
+                  />
+                </div>
+
+                {/* Editable: Resource */}
                 <div className="form-group">
                   <label>Resource</label>
                   <select name="resourceId" value={editForm.resourceId} onChange={onEditChange}>
@@ -417,30 +513,32 @@ export default function BookingList() {
                   </select>
                 </div>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Start time</label>
-                    <input type="datetime-local" name="startTime" value={editForm.startTime} onChange={onEditChange} />
-                  </div>
-                  <div className="form-group">
-                    <label>End time</label>
-                    <input type="datetime-local" name="endTime" value={editForm.endTime} onChange={onEditChange} />
-                  </div>
+                {/* Editable: Attendees with capacity validation */}
+                <div className="form-group">
+                  <label>Attendees {currentCapacityInfo && `(Max: ${currentMaxAttendees})`}</label>
+                  <input 
+                    type="number" 
+                    name="attendees" 
+                    min="1" 
+                    max={currentMaxAttendees}
+                    value={editForm.attendees} 
+                    onChange={onEditChange} 
+                  />
+                  {currentCapacityInfo && (
+                    <small className="hint-text capacity-hint">
+                      ⚠️ {currentCapacityInfo}
+                    </small>
+                  )}
                 </div>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Attendees</label>
-                    <input type="number" name="attendees" min="1" value={editForm.attendees} onChange={onEditChange} />
-                  </div>
-                  <div className="form-group">
-                    <label>Status</label>
-                    <select name="status" value={editForm.status} onChange={onEditChange}>
-                      {STATUS_OPTIONS.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </div>
+                {/* Editable: Status */}
+                <div className="form-group">
+                  <label>Status</label>
+                  <select name="status" value={editForm.status} onChange={onEditChange}>
+                    {STATUS_OPTIONS.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="modal-actions">

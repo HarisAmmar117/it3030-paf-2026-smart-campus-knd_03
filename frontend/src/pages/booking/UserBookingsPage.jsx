@@ -29,7 +29,6 @@ export default function UserBookingsPage() {
     localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
 
-  // Fetch resources for resource name mapping
   const loadResources = useCallback(async () => {
     try {
       const data = await getAllResources();
@@ -39,13 +38,20 @@ export default function UserBookingsPage() {
     }
   }, []);
 
-  // Fetch user bookings
   const loadBookings = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const data = await getUserBookings({ userId });
       const bookingsArray = Array.isArray(data) ? data : [];
+      
+      // Debug: Log the first booking to see what fields are present
+      if (bookingsArray.length > 0) {
+        console.log("First booking object:", bookingsArray[0]);
+        console.log("createdAt field:", bookingsArray[0].createdAt);
+        console.log("All keys:", Object.keys(bookingsArray[0]));
+      }
+      
       setBookings(bookingsArray);
       setFilteredBookings(bookingsArray);
     } catch (err) {
@@ -60,7 +66,6 @@ export default function UserBookingsPage() {
     loadBookings();
   }, [loadResources, loadBookings]);
 
-  // Apply filters
   useEffect(() => {
     let filtered = [...bookings];
     if (statusFilter !== "ALL") {
@@ -69,7 +74,6 @@ export default function UserBookingsPage() {
     setFilteredBookings(filtered);
   }, [statusFilter, bookings]);
 
-  // Cancel booking function (only for PENDING bookings)
   const handleCancelBooking = async (bookingId) => {
     const confirmed = window.confirm("Are you sure you want to cancel this booking?");
     if (!confirmed) return;
@@ -98,9 +102,63 @@ export default function UserBookingsPage() {
     return resource?.name || `Resource #${resourceId}`;
   };
 
-  const formatDateTime = (dateStr) => {
-    if (!dateStr) return "N/A";
-    return new Date(dateStr).toLocaleString();
+  // Enhanced date formatter that handles multiple formats
+  const formatDateTime = (dateValue) => {
+    if (!dateValue) return "N/A";
+    
+    try {
+      let date;
+      
+      // Handle different input types
+      if (typeof dateValue === 'string') {
+        // Try parsing the string directly
+        date = new Date(dateValue);
+        
+        // If that fails, try replacing space with T (for MySQL format)
+        if (isNaN(date.getTime()) && dateValue.includes(' ')) {
+          date = new Date(dateValue.replace(' ', 'T'));
+        }
+      } else if (dateValue instanceof Date) {
+        date = dateValue;
+      } else if (typeof dateValue === 'object' && dateValue !== null) {
+        // Handle LocalDateTime object from Java (might be serialized as array or object)
+        if (Array.isArray(dateValue) && dateValue.length >= 3) {
+          // Format: [year, month, day, hour, minute, second]
+          const [year, month, day, hour, minute, second] = dateValue;
+          date = new Date(year, month - 1, day, hour || 0, minute || 0, second || 0);
+        } else if (dateValue.year !== undefined) {
+          // Object format: { year: 2026, month: 4, day: 10, hour: 19, minute: 27, second: 54 }
+          date = new Date(
+            dateValue.year,
+            (dateValue.month || 1) - 1,
+            dateValue.day || 1,
+            dateValue.hour || 0,
+            dateValue.minute || 0,
+            dateValue.second || 0
+          );
+        }
+      }
+      
+      // Check if date is valid
+      if (!date || isNaN(date.getTime())) {
+        console.warn("Could not parse date:", dateValue);
+        return String(dateValue);
+      }
+      
+      // Format as "Apr 10, 2026, 7:27:54 PM"
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+    } catch (error) {
+      console.error("Date formatting error:", error, "for value:", dateValue);
+      return String(dateValue);
+    }
   };
 
   const canCancel = (status) => {
@@ -110,7 +168,6 @@ export default function UserBookingsPage() {
   return (
     <div className="user-bookings-container">
       <div className="user-bookings-card">
-        {/* Theme Toggle */}
         <button onClick={toggleTheme} className="global-theme-toggle" aria-label="Toggle theme">
           {isDark ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -129,7 +186,6 @@ export default function UserBookingsPage() {
           )}
         </button>
 
-        {/* Header */}
         <div className="user-bookings-header">
           <div className="header-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
@@ -146,7 +202,6 @@ export default function UserBookingsPage() {
           </div>
         </div>
 
-        {/* Filters */}
         <div className="filters-section">
           <div className="filter-group">
             <label>
@@ -164,7 +219,6 @@ export default function UserBookingsPage() {
           </div>
         </div>
 
-        {/* Alerts */}
         {success && (
           <div className="alert alert-success">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -185,7 +239,6 @@ export default function UserBookingsPage() {
           </div>
         )}
 
-        {/* Bookings List */}
         <div className="bookings-content">
           {loading ? (
             <div className="loading-state">
@@ -271,13 +324,7 @@ export default function UserBookingsPage() {
 
                   <div className="booking-footer">
                     <div className="footer-date">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                        <line x1="16" y1="2" x2="16" y2="6" />
-                        <line x1="8" y1="2" x2="8" y2="6" />
-                        <line x1="3" y1="10" x2="21" y2="10" />
-                      </svg>
-                      <small>Created: {formatDateTime(booking.createdAt)}</small>
+                  
                     </div>
                     {canCancel(booking.status) && (
                       <button 

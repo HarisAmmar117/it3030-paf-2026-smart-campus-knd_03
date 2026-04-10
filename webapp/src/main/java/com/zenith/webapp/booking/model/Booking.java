@@ -2,6 +2,7 @@ package com.zenith.webapp.booking.model;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
 
 import com.zenith.webapp.booking.enums.BookingStatus;
 import com.zenith.webapp.facility.model.Resource;
@@ -37,6 +38,9 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     private BookingStatus status = BookingStatus.PENDING;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
 
  

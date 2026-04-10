@@ -87,26 +87,35 @@ public class BookingService {
         return mapToResponse(booking);
     }
 
-    // ------------------ UPDATE BOOKING ------------------
-    @Transactional
-    public BookingResponse updateBooking(Long bookingId, UpdateBookingRequest request) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+// ------------------ UPDATE BOOKING ------------------
+@Transactional
+public BookingResponse updateBooking(Long bookingId, UpdateBookingRequest request) {
+    Booking booking = bookingRepository.findById(bookingId)
+            .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        Resource resource = resourceRepository.findById(request.getResourceId())
-                .orElseThrow(() -> new RuntimeException("Resource not found"));
+    Resource resource = resourceRepository.findById(request.getResourceId())
+            .orElseThrow(() -> new RuntimeException("Resource not found"));
 
-        booking.setResource(resource);
-        booking.setStartTime(request.getStartTime());
-        booking.setEndTime(request.getEndTime());
-        booking.setStatus(request.getStatus());
-        booking.setPurpose(request.getPurpose());
-        booking.setAttendees(request.getAttendees());
+    booking.setResource(resource);
+    booking.setStartTime(request.getStartTime());
+    booking.setEndTime(request.getEndTime());
+    booking.setStatus(request.getStatus());
+    booking.setPurpose(request.getPurpose());
+    booking.setAttendees(request.getAttendees());
 
-        Booking updated = bookingRepository.save(booking);
-        return mapToResponse(updated);
-    }
+    Booking updated = bookingRepository.save(booking);
+    
+    // ── SEND NOTIFICATION FOR UPDATE ──────────────────────────────────────
+    CreateNotificationRequest notificationRequest = new CreateNotificationRequest();
+    notificationRequest.setRecipientId(booking.getUser().getUser_id());
+    notificationRequest.setType(NotificationType.BOOKING_UPDATED);
+    notificationRequest.setMessage("Your booking for \"" + resource.getName() + "\" has been updated. Status: " + request.getStatus());
+    notificationRequest.setReferenceId(updated.getBooking_id());
 
+    notificationService.createNotification(notificationRequest);
+    
+    return mapToResponse(updated);
+}
     // ------------------ DELETE BOOKING ------------------
     @Transactional
     public void deleteBooking(Long bookingId) {
@@ -192,6 +201,7 @@ public class BookingService {
         response.setPurpose(booking.getPurpose());
         response.setAttendees(booking.getAttendees());
         response.setStatus(booking.getStatus().name());
+        response.setCreatedAt(booking.getCreatedAt());
         return response;
     }
 

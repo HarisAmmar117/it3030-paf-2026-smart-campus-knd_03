@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";  // ← Add this import
 import { createBooking, getAllResources, getBookings } from "../../api/BookingApi";
 import "./BookingCreateForm.css";
 
@@ -88,6 +89,7 @@ const parseAvailabilityWindow = (availabilityWindow) => {
 };
 
 export default function BookingCreateForm() {
+  const navigate = useNavigate();  // ← Add this
   const [form, setForm] = useState(initialForm);
   const [resources, setResources] = useState([]);
   const [selectedResource, setSelectedResource] = useState(null);
@@ -272,12 +274,25 @@ export default function BookingCreateForm() {
       }
       const userId = Number(userIdRaw);
       const created = await createBooking(payload, userId);
-      setSuccess(`Booking #${created.id} created successfully`);
+      
+      // 🔥 FIX: Get the booking ID from the response (try different possible field names)
+      const bookingId = created.id || created.bookingId || created.booking_id;
+      
+      if (bookingId) {
+        setSuccess(`Booking #${bookingId} created successfully!`);
+      } else {
+        setSuccess("Booking created successfully!");
+      }
+      
       setForm(initialForm);
       setSelectedResource(null);
       setBookedSlots([]);
       
-      setTimeout(() => setSuccess(""), 4000);
+      // Optional: Redirect after successful booking
+      setTimeout(() => {
+        navigate("/bookings/my-bookings");
+      }, 1500);
+      
     } catch (err) {
       setError(err.message || "Unable to create booking. Please try again.");
       setTimeout(() => setError(""), 4000);
@@ -307,7 +322,23 @@ export default function BookingCreateForm() {
     <div className="booking-container">
       <div className="booking-card">
         {/* Theme Toggle */}
-
+        <button onClick={toggleTheme} className="global-theme-toggle" aria-label="Toggle theme">
+          {isDark ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+            </svg>
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          )}
+        </button>
 
         {/* Header */}
         <div className="booking-header">

@@ -23,4 +23,5 @@ public class BookingResponse {
     private int attendees;
 
     private String status;
+    private LocalDateTime createdAt;
 }
