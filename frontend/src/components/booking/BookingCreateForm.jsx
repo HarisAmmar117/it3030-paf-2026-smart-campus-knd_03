@@ -265,7 +265,12 @@ export default function BookingCreateForm() {
         purpose: form.purpose,
         attendees: Number(form.attendees),
       };
-      const userId = parseInt(localStorage.getItem("userId"));
+      const userIdRaw = localStorage.getItem("userId");
+      if (!userIdRaw) {
+        setError("User not logged in");
+        return;
+      }
+      const userId = Number(userIdRaw);
       const created = await createBooking(payload, userId);
       setSuccess(`Booking #${created.id} created successfully`);
       setForm(initialForm);

@@ -1,85 +1,200 @@
-const BASE_URL = "http://localhost:8081";
+import { BASE_URL, getAuthHeaders } from "./apiClient";
 
-// CREATE
+// ========================
+// SAFE REQUEST WRAPPER
+// ========================
+async function request(url, options = {}) {
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...getAuthHeaders(),
+        ...(options.headers || {}),
+      },
+    });
+
+    return response;
+  } catch (error) {
+    throw new Error("Network error: Backend not reachable or CORS blocked");
+  }
+}
+
+// ========================
+// CREATE NOTIFICATION
+// ========================
 export async function createNotification(payload) {
-    const response = await fetch(`${BASE_URL}/api/notifications`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-    });
-    const data = await response.json().catch(() => null);
-    if (!response.ok) throw new Error((data && data.message) || "Failed to create notification");
-    return data;
+  const response = await request(`${BASE_URL}/api/notifications`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload || {}),
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || "Failed to create notification");
+  }
+
+  return data;
 }
 
-// READ — all notifications (no recipientId = admin sees all)
+// ========================
+// READ ALL (ADMIN)
+// ========================
 export async function getAllNotifications() {
-    const response = await fetch(`${BASE_URL}/api/notifications`);
-    const data = await response.json().catch(() => []);
-    if (!response.ok) throw new Error((data && data.message) || "Failed to fetch notifications");
-    return data;
+  const response = await request(`${BASE_URL}/api/notifications`);
+
+  const data = await response.json().catch(() => []);
+
+  if (!response.ok) {
+    throw new Error(data?.message || "Failed to fetch notifications");
+  }
+
+  return data;
 }
 
-// READ — one user's notifications
+// ========================
+// READ USER NOTIFICATIONS
+// ========================
 export async function getNotifications(recipientId) {
-    const response = await fetch(`${BASE_URL}/api/notifications?recipientId=${recipientId}`);
-    const data = await response.json().catch(() => []);
-    if (!response.ok) throw new Error((data && data.message) || "Failed to fetch notifications");
-    return data;
+  const response = await request(
+    `${BASE_URL}/api/notifications?recipientId=${recipientId}`
+  );
+
+  const data = await response.json().catch(() => []);
+
+  if (!response.ok) {
+    throw new Error(data?.message || "Failed to fetch notifications");
+  }
+
+  return data;
 }
 
-// READ — unread count
+// ========================
+// UNREAD COUNT
+// ========================
 export async function getUnreadCount(recipientId) {
-    const response = await fetch(`${BASE_URL}/api/notifications/unread-count?recipientId=${recipientId}`);
-    const data = await response.json().catch(() => ({ unreadCount: 0 }));
-    if (!response.ok) throw new Error("Failed to fetch unread count");
-    return data.unreadCount;
+  const response = await request(
+    `${BASE_URL}/api/notifications/unread-count?recipientId=${recipientId}`
+  );
+
+  const data = await response.json().catch(() => ({ unreadCount: 0 }));
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch unread count");
+  }
+
+  return data.unreadCount;
 }
 
-// UPDATE — edit message/type
+// ========================
+// UPDATE NOTIFICATION (PUT)
+// ========================
 export async function updateNotification(notificationId, payload) {
-    const response = await fetch(`${BASE_URL}/api/notifications/${notificationId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-    });
-    const data = await response.json().catch(() => null);
-    if (!response.ok) throw new Error((data && data.message) || "Failed to update notification");
-    return data;
+  const response = await request(
+    `${BASE_URL}/api/notifications/${notificationId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload || {}),
+    }
+  );
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || "Failed to update notification");
+  }
+
+  return data;
 }
 
-// UPDATE — mark one as read
+// ========================
+// MARK AS READ
+// ========================
 export async function markAsRead(notificationId, userId) {
-    const response = await fetch(`${BASE_URL}/api/notifications/${notificationId}/read`, {
-        method: "PATCH",
-        headers: { "X-User-Id": String(userId) },
-    });
-    const data = await response.json().catch(() => null);
-    if (!response.ok) throw new Error((data && data.message) || "Failed to mark as read");
-    return data;
+  const response = await request(
+    `${BASE_URL}/api/notifications/${notificationId}/read`,
+    {
+      method: "PATCH",
+      headers: {
+        "X-User-Id": String(userId),
+      },
+    }
+  );
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || "Failed to mark as read");
+  }
+
+  return data;
 }
 
-// UPDATE — mark all as read
+// ========================
+// MARK ALL AS READ
+// ========================
 export async function markAllAsRead(userId) {
-    const response = await fetch(`${BASE_URL}/api/notifications/read-all`, {
-        method: "PATCH",
-        headers: { "X-User-Id": String(userId) },
-    });
-    if (!response.ok) throw new Error("Failed to mark all as read");
+  const response = await request(
+    `${BASE_URL}/api/notifications/read-all`,
+    {
+      method: "PATCH",
+      headers: {
+        "X-User-Id": String(userId),
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.message || "Failed to mark all as read");
+  }
+
+  return true;
 }
 
-// DELETE by Admin
+// ========================
+// DELETE (ADMIN)
+// ========================
 export async function deleteNotification(notificationId) {
-    const response = await fetch(`${BASE_URL}/api/notifications/${notificationId}`, {
-        method: "DELETE",
-    });
-    if (!response.ok) throw new Error("Failed to delete notification");
+  const response = await request(
+    `${BASE_URL}/api/notifications/${notificationId}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.message || "Failed to delete notification");
+  }
+
+  return true;
 }
-// Delete by User
+
+// ========================
+// DELETE (USER)
+// ========================
 export async function deleteNotificationByUser(notificationId, userId) {
-    const response = await fetch(`${BASE_URL}/api/notifications/my/${notificationId}`, {
-        method: "DELETE",
-        headers: { "X-User-Id": String(userId) },
-    });
-    if (!response.ok) throw new Error("Failed to delete notification");
+  const response = await request(
+    `${BASE_URL}/api/notifications/my/${notificationId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "X-User-Id": String(userId),
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.message || "Failed to delete notification");
+  }
+
+  return true;
 }

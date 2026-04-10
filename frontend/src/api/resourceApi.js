@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8081";
+import { BASE_URL, getAuthHeaders } from "./apiClient";
 
 // ========================
 // GET all resources (optional type filter)
@@ -11,7 +11,10 @@ export async function getResources(filters = {}) {
   const query = params.toString();
   const url = `${BASE_URL}/api/resources${query ? `?${query}` : ""}`;
 
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    headers: getAuthHeaders()
+  });
+
   let data = null;
 
   try {
@@ -33,7 +36,10 @@ export async function getResources(filters = {}) {
 // GET single resource by ID
 // ========================
 export async function getResourceById(id) {
-  const response = await fetch(`${BASE_URL}/api/resources/${id}`);
+  const response = await fetch(`${BASE_URL}/api/resources/${id}`, {
+    headers: getAuthHeaders()
+  });
+
   let data = null;
 
   try {
@@ -57,13 +63,12 @@ export async function getResourceById(id) {
 export async function createResource(payload) {
   const response = await fetch(`${BASE_URL}/api/resources`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(payload),
   });
 
   let data = null;
+
   try {
     data = await response.json();
   } catch {
@@ -85,13 +90,12 @@ export async function createResource(payload) {
 export async function updateResource(id, payload) {
   const response = await fetch(`${BASE_URL}/api/resources/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(payload),
   });
 
   let data = null;
+
   try {
     data = await response.json();
   } catch {
@@ -113,18 +117,22 @@ export async function updateResource(id, payload) {
 export async function deleteResource(id) {
   const response = await fetch(`${BASE_URL}/api/resources/${id}`, {
     method: "DELETE",
+    headers: getAuthHeaders()
   });
 
-  if (!response.ok) {
-    let data = null;
-    try {
-      data = await response.json();
-    } catch {
-      data = null;
-    }
+  let data = null;
 
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
     const message =
       (data && (data.error || data.message)) || "Failed to delete resource";
     throw new Error(message);
   }
+
+  return data;
 }

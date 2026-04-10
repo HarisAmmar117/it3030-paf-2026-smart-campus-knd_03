@@ -47,6 +47,7 @@ import AboutUs from "./pages/AboutUs";
 // AUTH PAGES
 // ========================
 import LoginPage from "./pages/auth/LoginPage";
+import OAuthSuccess from "./pages/auth/OAuthSuccess";
 
 function RequireAdmin({ children, redirectTo = "/tickets" }) {
   if (!hasTicketAdminAccess()) return <Navigate to={redirectTo} replace />;
@@ -97,7 +98,7 @@ RequireAdminOrSupport.propTypes = {
 
 function App() {
   const location = useLocation();
-  const hideNavbar = location.pathname === "/login";
+  const hideNavbar = location.pathname === "/login" || location.pathname === "/oauth-success";
   const token = localStorage.getItem("token");
   const loginRedirectPath = hasTicketAdminAccess() ? "/tickets/admin" : "/tickets";
 
@@ -106,6 +107,9 @@ function App() {
       {!hideNavbar && <Navbar />}
       <main className="app-main">
         <Routes>
+          {/* OAuth Success Route - No Navbar */}
+          <Route path="/oauth-success" element={<OAuthSuccess />} />
+
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutUs />} />

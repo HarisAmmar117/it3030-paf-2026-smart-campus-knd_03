@@ -4,6 +4,7 @@ package com.zenith.webapp.booking.controller;
 
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,19 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<BookingResponse> createBooking(
             @RequestBody BookingRequest request,
-            @RequestHeader("userId") Long userId) {
+            HttpServletRequest httpRequest) {
+        // Get userId from request attribute (set by JwtAuthenticationFilter)
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        if (userId == null) {
+            // Fallback to header if attribute not set
+            String userIdHeader = httpRequest.getHeader("userId");
+            if (userIdHeader != null) {
+                userId = Long.parseLong(userIdHeader);
+            }
+        }
+        if (userId == null) {
+            throw new RuntimeException("User ID not found in authentication");
+        }
         return ResponseEntity.ok(bookingService.createBooking(request, userId));
     }
 
@@ -76,9 +89,22 @@ public class BookingController {
     //USER specific bookings
     @GetMapping("/my")
     public ResponseEntity<List<BookingResponse>> getMyBookings(
-            @RequestHeader("userId") Long userId,
+            HttpServletRequest httpRequest,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String resource) {
+        
+        // Get userId from request attribute (set by JwtAuthenticationFilter)
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        if (userId == null) {
+            // Fallback to header if attribute not set
+            String userIdHeader = httpRequest.getHeader("userId");
+            if (userIdHeader != null) {
+                userId = Long.parseLong(userIdHeader);
+            }
+        }
+        if (userId == null) {
+            throw new RuntimeException("User ID not found in authentication");
+        }
 
         return ResponseEntity.ok(
             bookingService.getBookingsByUser(userId, status, resource)

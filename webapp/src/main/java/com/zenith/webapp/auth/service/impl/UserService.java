@@ -10,11 +10,12 @@ import com.zenith.webapp.auth.dto.response.UserResponse;
 import com.zenith.webapp.auth.enums.UserRole;
 import com.zenith.webapp.auth.model.User;
 import com.zenith.webapp.auth.repository.UserRepository;
+import com.zenith.webapp.config.jwt.JwtTokenProvider;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import lombok.RequiredArgsConstructor;
-import java.util.UUID;
 import com.zenith.webapp.auth.dto.request.LoginRequest;
 import com.zenith.webapp.auth.dto.response.AuthResponse;
 
@@ -24,6 +25,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
     public UserResponse createUser(UserRequest userRequest){
 
         User user = new User();
@@ -107,16 +109,34 @@ public class UserService {
 
     }
 
-    public AuthResponse login(LoginRequest request) {
-    User user = userRepository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+      public AuthResponse login(LoginRequest request) {
 
+    User user = userRepository.findByEmail(request.getEmail())
+            .orElseThrow(() ->
+                    new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+
+    // 🔥 FIX: block OAuth users from normal login
+    if (user.getPassword() == null) {
+        throw new ResponseStatusException(
+                HttpStatus.UNAUTHORIZED,
+                "This account uses Google login. Please sign in with Google."
+        );
+    }
+
+    // 🔥 SAFE password check
     if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
     }
 
+    // ✅ GENERATE JWT
+    String token = jwtTokenProvider.generateToken(
+            user.getEmail(),
+            user.getRole().name(),
+            user.getUser_id()
+    );
+
     AuthResponse response = new AuthResponse();
-    response.setToken(UUID.randomUUID().toString()); // temporary token (JWT step later)
+    response.setToken(token);
     response.setId(user.getUser_id());
     response.setName(user.getName());
     response.setEmail(user.getEmail());

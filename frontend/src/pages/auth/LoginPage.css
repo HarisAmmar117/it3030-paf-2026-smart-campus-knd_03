@@ -406,3 +406,55 @@
     height: 44px;
   }
 }
+
+/* Add these styles to LoginPage.css */
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-medium);
+}
+
+.divider span {
+  padding: 0 10px;
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+}
+
+/* Google OAuth Button */
+.google-btn {
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-medium);
+  color: var(--text-primary);
+}
+
+.google-btn:hover {
+  background: var(--accent-light);
+  border-color: var(--accent-border);
+  transform: translateY(-1px);
+}
+
+.google-btn svg {
+  width: 18px;
+  height: 18px;
+}
