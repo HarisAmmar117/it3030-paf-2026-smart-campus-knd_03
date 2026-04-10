@@ -68,6 +68,11 @@ public class TicketServiceImpl implements TicketService {
                 .build();
 
         Ticket saved = ticketRepository.save(ticket);
+
+        if (saved.getPriority() == TicketPriority.HIGH) {
+            notifyAdminsForHighPriorityTicket(saved);
+        }
+
         return toTicketResponse(saved);
     }
 
@@ -428,6 +433,25 @@ public class TicketServiceImpl implements TicketService {
             notificationService.createNotification(notification);
         } catch (Exception ignored) {
             // Notification delivery should not block comment creation.
+        }
+    }
+
+    private void notifyAdminsForHighPriorityTicket(Ticket ticket) {
+        try {
+            List<User> admins = userRepository.findByRole(UserRole.ADMIN);
+
+            for (User admin : admins) {
+                CreateNotificationRequest notification = new CreateNotificationRequest();
+                notification.setRecipientId(admin.getUser_id());
+                notification.setType(NotificationType.TICKET_STATUS_CHANGED);
+                notification.setReferenceId(ticket.getId());
+                notification.setMessage(
+                        "High priority ticket #" + ticket.getId() + " created: " + ticket.getTitle()
+                );
+                notificationService.createNotification(notification);
+            }
+        } catch (Exception ignored) {
+            // Notification delivery should not block ticket creation.
         }
     }
 

@@ -166,7 +166,10 @@ export default function Navbar() {
 
       const formatted = latest.map((n) => ({
         id: n.id,
-        heading: n.type?.replace(/_/g, " ") || "Notification",
+        heading:
+          n.type === "TICKET_STATUS_CHANGED" && /high priority ticket/i.test(n.message || "")
+            ? "HIGH TICKET ARRIVED"
+            : n.type?.replace(/_/g, " ") || "Notification",
         content: n.message || n.title || "No content",
         time: formatTime(n.createdAt),
         read: n.read || false,

@@ -370,6 +370,22 @@
   color: white;
 }
 
+.comment-submit-icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+  color: #ffffff;
+}
+
+.comment-submit-icon,
+.comment-submit-icon * {
+  stroke: #ffffff !important;
+  fill: none !important;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .comment-submit:hover:not(:disabled) {
   background: var(--accent-hover);
   transform: scale(1.05);

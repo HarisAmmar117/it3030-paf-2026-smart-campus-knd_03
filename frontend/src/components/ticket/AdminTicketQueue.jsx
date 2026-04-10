@@ -4,6 +4,7 @@ import {
   assignTicket,
   updateTicketStatus,
   registerSupportStaff,
+  getUsers,
 } from "../../api/ticketApi";
 import { getCurrentRole, isAdminRole } from "../../utils/authSession";
 import CommentSection from "./CommentSection";
@@ -51,6 +52,7 @@ export default function AdminTicketQueue() {
   const [expandedPanels, setExpandedPanels] = useState({});
   const [openComments, setOpenComments] = useState({});
   const [openAttachments, setOpenAttachments] = useState({});
+  const [supportStaffUsers, setSupportStaffUsers] = useState([]);
   const [staffForm, setStaffForm] = useState({
     name: "",
     email: "",
@@ -85,9 +87,48 @@ export default function AdminTicketQueue() {
     }
   }, [statusFilter, priorityFilter]);
 
+  const loadSupportStaff = useCallback(async () => {
+    try {
+      const users = await getUsers();
+      const staffOnly = users.filter((u) => String(u.role || "").toUpperCase() === "SUPPORT_STAFF");
+      setSupportStaffUsers(staffOnly);
+    } catch {
+      setSupportStaffUsers([]);
+    }
+  }, []);
+
   useEffect(() => {
     loadTickets();
-  }, [loadTickets]);
+    loadSupportStaff();
+  }, [loadTickets, loadSupportStaff]);
+
+  const busyStaffIds = new Set(
+    tickets
+      .filter((ticket) => ticket.status !== "CLOSED" && ticket.assigneeId != null)
+      .map((ticket) => Number(ticket.assigneeId))
+  );
+
+  const availableSupportStaff = supportStaffUsers.filter(
+    (user) => !busyStaffIds.has(Number(user.user_id))
+  );
+
+  const busySupportStaff = supportStaffUsers
+    .map((user) => {
+      const blockingTickets = tickets
+        .filter(
+          (ticket) =>
+            ticket.status !== "CLOSED" &&
+            ticket.assigneeId != null &&
+            Number(ticket.assigneeId) === Number(user.user_id)
+        )
+        .map((ticket) => ticket.id);
+
+      return {
+        ...user,
+        blockingTickets,
+      };
+    })
+    .filter((user) => user.blockingTickets.length > 0);
 
   const togglePanel = (id) => {
     setExpandedPanels((p) => ({ ...p, [id]: !p[id] }));
@@ -278,6 +319,7 @@ export default function AdminTicketQueue() {
           const isExpanded = expandedPanels[t.id];
           const isLoading = actionLoading[t.id];
           const currentAction = statusActions[t.id];
+          const isAssignLocked = t.status === "RESOLVED" || t.status === "CLOSED";
 
           return (
             <article className={`admin-ticket ${isExpanded ? "admin-ticket-expanded" : ""}`} key={t.id}>
@@ -334,24 +376,52 @@ export default function AdminTicketQueue() {
                     <div className="admin-action-section">
                       <h4>🔧 Assign Technician</h4>
                       <div className="admin-action-row">
-                        <input
-                          type="number"
-                          placeholder="Staff User ID"
+                        <select
                           value={assignInputs[t.id] || ""}
                           onChange={(e) =>
                             setAssignInputs((p) => ({ ...p, [t.id]: e.target.value }))
                           }
                           className="admin-input"
-                        />
+                          disabled={isAssignLocked}
+                        >
+                          <option value="">Select Available Staff</option>
+                          {availableSupportStaff.map((staff) => (
+                            <option key={staff.user_id} value={staff.user_id}>
+                              {staff.name} (ID: {staff.user_id})
+                            </option>
+                          ))}
+                        </select>
                         <button
                           type="button"
                           className="admin-action-btn admin-btn-assign"
                           onClick={() => handleAssign(t.id)}
-                          disabled={!assignInputs[t.id] || isLoading}
+                          disabled={isAssignLocked || !assignInputs[t.id] || isLoading || availableSupportStaff.length === 0}
                         >
                           {isLoading ? "Assigning..." : "Assign"}
                         </button>
                       </div>
+                      {isAssignLocked && (
+                        <small className="admin-assign-hint">
+                          Assignment is disabled because this ticket is {t.status}.
+                        </small>
+                      )}
+                      {availableSupportStaff.length === 0 && (
+                        <small className="admin-assign-hint">
+                          No available support staff right now. Staff assigned only to CLOSED tickets are automatically released.
+                        </small>
+                      )}
+
+                      {busySupportStaff.length > 0 && (
+                        <div className="admin-busy-staff">
+                          <div className="admin-busy-title">Currently Busy Staff</div>
+                          {busySupportStaff.map((staff) => (
+                            <div key={staff.user_id} className="admin-busy-item">
+                              <span>{staff.name} (ID: {staff.user_id})</span>
+                              <span>Busy on ticket(s): {staff.blockingTickets.map((id) => `#${id}`).join(", ")}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 

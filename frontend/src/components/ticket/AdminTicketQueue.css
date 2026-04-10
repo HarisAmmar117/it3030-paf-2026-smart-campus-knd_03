@@ -497,6 +497,44 @@
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
+.admin-assign-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.74rem;
+  color: var(--text-tertiary);
+}
+
+.admin-busy-staff {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: var(--bg-tertiary);
+}
+
+.admin-busy-title {
+  margin-bottom: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.admin-busy-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+  border-top: 1px dashed var(--border-light);
+  font-size: 0.76rem;
+  color: var(--text-tertiary);
+}
+
+.admin-busy-item:first-of-type {
+  border-top: none;
+}
+
 /* ========== ACTION BUTTONS ========== */
 .admin-action-btn {
   padding: 8px 18px;
