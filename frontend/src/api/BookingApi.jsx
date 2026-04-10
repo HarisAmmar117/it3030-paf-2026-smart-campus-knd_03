@@ -5,7 +5,7 @@ const BASE_URL = "http://localhost:8081";
 // ========================
 
 // CREATE BOOKING
-export async function createBooking(payload, userId = 2) {
+export async function createBooking(payload, userId) {
   const response = await fetch(`${BASE_URL}/api/bookings`, {
     method: "POST",
     headers: {
@@ -31,7 +31,7 @@ export async function createBooking(payload, userId = 2) {
   return data;
 }
 
-// GET ALL BOOKINGS
+// GET ALL BOOKINGS (Admin only)
 export async function getBookings() {
   const response = await fetch(`${BASE_URL}/api/bookings`);
 
@@ -71,16 +71,24 @@ export async function getBookingById(bookingId) {
   return data;
 }
 
-//GET USER BOOKINGS
-export async function getUserBookings({ userId = 2, status, resource } = {}) {
+// GET USER BOOKINGS - IMPROVED VERSION
+export async function getUserBookings({ userId, status, resource } = {}) {
+  // Validate userId is provided
+  if (!userId) {
+    throw new Error("User ID is required to fetch user bookings");
+  }
+
   const params = new URLSearchParams();
-  if (status) params.append("status", status);
+  if (status && status !== "ALL") params.append("status", status);
   if (resource) params.append("resource", resource);
 
-  const response = await fetch(`${BASE_URL}/api/bookings/my?${params.toString()}`, {
+  const url = `${BASE_URL}/api/bookings/my?${params.toString()}`;
+  
+  const response = await fetch(url, {
     method: "GET",
     headers: {
       "userId": String(userId),
+      "Content-Type": "application/json",
     },
   });
 
@@ -98,13 +106,52 @@ export async function getUserBookings({ userId = 2, status, resource } = {}) {
     throw new Error(message);
   }
 
+  // Ensure we always return an array
+  return Array.isArray(data) ? data : [];
+}
+
+// GET USER BOOKINGS WITH PAGINATION (Optional improvement)
+export async function getUserBookingsPaginated({ userId, status, page = 0, size = 10 } = {}) {
+  if (!userId) {
+    throw new Error("User ID is required to fetch user bookings");
+  }
+
+  const params = new URLSearchParams();
+  if (status && status !== "ALL") params.append("status", status);
+  params.append("page", page);
+  params.append("size", size);
+
+  const url = `${BASE_URL}/api/bookings/my?${params.toString()}`;
+  
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "userId": String(userId),
+      "Content-Type": "application/json",
+    },
+  });
+
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = { content: [], totalElements: 0 };
+  }
+
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) ||
+      "Failed to fetch user bookings";
+    throw new Error(message);
+  }
+
   return data;
 }
 
 // UPDATE BOOKING
-export async function updateBooking(bookingId, payload, userId = 2) {
+export async function updateBooking(bookingId, payload, userId) {
   const response = await fetch(`${BASE_URL}/api/bookings/${bookingId}`, {
-    method: "PUT", // or PATCH based on your backend
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
       "userId": String(userId),
@@ -128,12 +175,10 @@ export async function updateBooking(bookingId, payload, userId = 2) {
   return data;
 }
 
-// UPDATE BOOKING STATUS (IMPORTANT)
-export async function updateBookingStatus(
-  bookingId,
-  status,
-  userId = 2
-) {
+// UPDATE BOOKING STATUS (APPROVE/REJECT/CANCEL)
+export async function updateBookingStatus(bookingId, status, rejectionReason = null) {
+  const payload = rejectionReason ? { status, rejectionReason } : { status };
+  
   const response = await fetch(
     `${BASE_URL}/api/bookings/${bookingId}/status`,
     {
@@ -141,28 +186,21 @@ export async function updateBookingStatus(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(payload),
     }
   );
-
-  let data = null;
-  try {
-    data = await response.json();
-  } catch {
-    data = null;
-  }
-
-  if (!response.ok) {
-    const message =
-      (data && (data.error || data.message)) ||
-      "Failed to update booking status";
-    throw new Error(message);
-  }
-
+  
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error((data && data.message) || "Failed to update booking status");
   return data;
 }
 
-// DELETE BOOKING
+// CANCEL BOOKING (User friendly wrapper)
+export async function cancelBooking(bookingId, userId) {
+  return updateBookingStatus(bookingId, "CANCELLED");
+}
+
+// DELETE BOOKING (Admin only)
 export async function deleteBooking(bookingId) {
   const response = await fetch(`${BASE_URL}/api/bookings/${bookingId}`, {
     method: "DELETE",
@@ -176,7 +214,6 @@ export async function deleteBooking(bookingId) {
     throw new Error((data?.error || data?.message) || "Failed to delete booking");
   }
 }
-
 
 // GET ALL RESOURCES
 export async function getAllResources(type) {
@@ -197,6 +234,26 @@ export async function getAllResources(type) {
   if (!response.ok) {
     const message =
       (data && (data.error || data.message)) || "Failed to fetch resources";
+    throw new Error(message);
+  }
+
+  return data;
+}
+
+// GET SINGLE RESOURCE
+export async function getResourceById(resourceId) {
+  const response = await fetch(`${BASE_URL}/api/resources/${resourceId}`);
+
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    const message =
+      (data && (data.error || data.message)) || "Failed to fetch resource";
     throw new Error(message);
   }
 

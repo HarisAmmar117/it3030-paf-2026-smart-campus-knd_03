@@ -117,6 +117,16 @@
   flex-shrink: 0;
 }
 
+.attachment-readonly-note {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+}
+
 /* ========== ATTACHMENT GRID ========== */
 .attachment-grid {
   display: grid;
@@ -206,6 +216,10 @@
 .attachment-delete:hover {
   background: var(--danger);
   transform: scale(1.05);
+}
+
+.attachment-delete:disabled {
+  display: none;
 }
 
 /* ========== DROPZONE ========== */

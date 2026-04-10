@@ -7,7 +7,7 @@ import {
 } from "../../api/ticketApi";
 import "./CommentSection.css";
 
-export default function CommentSection({ ticketId, currentUserId = 101 }) {
+export default function CommentSection({ ticketId, currentUserId }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
@@ -288,11 +288,13 @@ export default function CommentSection({ ticketId, currentUserId = 101 }) {
           type="submit"
           className="comment-submit"
           disabled={submitting || !newComment.trim()}
+          title="Send comment"
+          aria-label="Send comment"
         >
           {submitting ? (
             <span className="spinner-small" />
           ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg className="comment-submit-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <line x1="22" y1="2" x2="11" y2="13" />
               <polygon points="22 2 15 22 11 13 2 9 22 2" />
             </svg>

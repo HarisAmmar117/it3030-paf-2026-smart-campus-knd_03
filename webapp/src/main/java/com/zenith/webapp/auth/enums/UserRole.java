@@ -2,6 +2,6 @@ package com.zenith.webapp.auth.enums;
 
 public enum UserRole {
 
-    ADMIN, USER
+    ADMIN, USER, SUPPORT_STAFF
 
 }

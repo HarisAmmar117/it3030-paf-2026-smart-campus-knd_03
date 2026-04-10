@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { deleteTicket, getTickets, updateTicket } from "../../api/ticketApi";
+import { getCurrentUserId } from "../../utils/authSession";
 import CommentSection from "./CommentSection";
 import AttachmentSection from "./AttachmentSection";
 import "./TicketList.css";
@@ -28,7 +29,7 @@ export default function TicketList() {
   const [editContactError, setEditContactError] = useState("");
   const [openComments, setOpenComments] = useState({});
   const [openAttachments, setOpenAttachments] = useState({});
-  const currentUserId = 101;
+  const currentUserId = getCurrentUserId();
 
   const validateContact = (value) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -51,17 +52,23 @@ export default function TicketList() {
   };
 
   const loadTickets = useCallback(async () => {
+    if (!currentUserId) {
+      setTickets([]);
+      setError("User session not found. Please log in again.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
-      const data = await getTickets({ status, priority });
+      const data = await getTickets({ status, priority, requesterId: currentUserId });
       setTickets(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.message || "Unable to load tickets");
     } finally {
       setLoading(false);
     }
-  }, [status, priority]);
+  }, [status, priority, currentUserId]);
 
   useEffect(() => {
     loadTickets();
@@ -73,6 +80,7 @@ export default function TicketList() {
   };
 
   const onStartUpdate = (ticket) => {
+    if (!currentUserId) return;
     if (!(ticket.status === "OPEN" && ticket.requesterId === currentUserId)) return;
 
     setEditTicketId(ticket.id);
@@ -105,7 +113,7 @@ export default function TicketList() {
     setSavingEdit(true);
     setError("");
     try {
-      await updateTicket(editTicketId, editForm);
+      await updateTicket(editTicketId, editForm, currentUserId);
       setEditTicketId(null);
       setEditForm(null);
       await loadTickets();
@@ -127,7 +135,7 @@ export default function TicketList() {
     if (!confirmed) return;
 
     try {
-      await deleteTicket(ticketId);
+      await deleteTicket(ticketId, currentUserId);
       await loadTickets();
     } catch (err) {
       setError(err.message || "Unable to delete ticket");
@@ -390,6 +398,10 @@ export default function TicketList() {
                           </select>
                         </div>
                       </div>
+
+                      {editContactError && (
+                        <div className="alert alert-error">{editContactError}</div>
+                      )}
 
                       <div className="ticket-edit-actions">
                         <button type="submit" className="btn-save" disabled={savingEdit}>

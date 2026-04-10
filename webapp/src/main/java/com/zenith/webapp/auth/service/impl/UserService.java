@@ -10,16 +10,20 @@ import com.zenith.webapp.auth.dto.response.UserResponse;
 import com.zenith.webapp.auth.enums.UserRole;
 import com.zenith.webapp.auth.model.User;
 import com.zenith.webapp.auth.repository.UserRepository;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 import lombok.RequiredArgsConstructor;
-
+import java.util.UUID;
+import com.zenith.webapp.auth.dto.request.LoginRequest;
+import com.zenith.webapp.auth.dto.response.AuthResponse;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
-
+    private final PasswordEncoder passwordEncoder;
     public UserResponse createUser(UserRequest userRequest){
 
         User user = new User();
@@ -36,6 +40,9 @@ public class UserService {
             user.setCreated_at(LocalDateTime.now()); 
         }
 
+        if (userRepository.existsByEmail(userRequest.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
+}
         User savedUser = userRepository.save(user);
         return mapUserToUserResponse(savedUser);
     }
@@ -91,7 +98,30 @@ public class UserService {
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
-        user.setPassword(request.getPassword());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        if (request.getRole() != null) {
+            user.setRole(request.getRole());
+        }
 
     }
+
+    public AuthResponse login(LoginRequest request) {
+    User user = userRepository.findByEmail(request.getEmail())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+
+    if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+    }
+
+    AuthResponse response = new AuthResponse();
+    response.setToken(UUID.randomUUID().toString()); // temporary token (JWT step later)
+    response.setId(user.getUser_id());
+    response.setName(user.getName());
+    response.setEmail(user.getEmail());
+    response.setRole(user.getRole());
+
+    return response;
+}
 }

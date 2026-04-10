@@ -8,6 +8,9 @@ import com.zenith.webapp.booking.model.Booking;
 import com.zenith.webapp.booking.repository.BookingRepository;
 import com.zenith.webapp.facility.model.Resource;
 import com.zenith.webapp.facility.repository.ResourceRepository;
+import com.zenith.webapp.notification.dto.request.CreateNotificationRequest;
+import com.zenith.webapp.notification.enums.NotificationType;
+import com.zenith.webapp.notification.service.NotificationService;
 import com.zenith.webapp.auth.model.User;
 import com.zenith.webapp.auth.repository.UserRepository;
 
@@ -24,15 +27,18 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ResourceRepository resourceRepository;
+    private final NotificationService notificationService;
 
     public BookingService(BookingRepository bookingRepository,
                           UserRepository userRepository,
-                          ResourceRepository resourceRepository) {
+                          ResourceRepository resourceRepository,
+                          NotificationService notificationService) {  // ← add param
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.resourceRepository = resourceRepository;
+        this.notificationService = notificationService;  // ← assign
     }
-
+    
     // ------------------ CREATE BOOKING ------------------
     @Transactional
     public BookingResponse createBooking(BookingRequest request, Long userId) {
@@ -52,6 +58,16 @@ public class BookingService {
         booking.setStatus(BookingStatus.PENDING);
 
         Booking saved = bookingRepository.save(booking);
+
+                // ── AUTO-SEND NOTIFICATION ──────────────────────────────────────
+        CreateNotificationRequest notificationRequest = new CreateNotificationRequest();
+        notificationRequest.setRecipientId(userId);
+        notificationRequest.setType(NotificationType.BOOKING_CREATED);
+        notificationRequest.setMessage("Your booking for \"" + resource.getName() + "\" has been submitted and is pending approval.");
+        notificationRequest.setReferenceId(saved.getBooking_id());
+
+        notificationService.createNotification(notificationRequest);
+
         return mapToResponse(saved);
     }
 
@@ -103,15 +119,58 @@ public class BookingService {
     
 
     // ------------------ UPDATE STATUS ------------------
-    @Transactional
-    public BookingResponse updateBookingStatus(Long bookingId, BookingStatus status) {
+        @Transactional
+        public BookingResponse updateBookingStatus(Long bookingId, BookingStatus status, String rejectionReason) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
-
+        
+        Resource resource = booking.getResource();
+        String resourceName = resource.getName();
+        
         booking.setStatus(status);
         Booking saved = bookingRepository.save(booking);
+        
+        // Create notification
+        CreateNotificationRequest notificationRequest = new CreateNotificationRequest();
+        notificationRequest.setRecipientId(booking.getUser().getUser_id());
+        notificationRequest.setReferenceId(saved.getBooking_id());
+        
+        String message;
+        NotificationType notificationType;
+        
+        switch (status) {
+        case APPROVED:
+                notificationType = NotificationType.BOOKING_APPROVED;
+                message = String.format("✅ Your booking for \"%s\" has been APPROVED!", resourceName);
+                break;
+
+        case REJECTED:
+                notificationType = NotificationType.BOOKING_REJECTED;
+                if (rejectionReason != null && !rejectionReason.isEmpty()) {
+                message = String.format("❌ Your booking for \"%s\" has been REJECTED.\nReason: %s", resourceName, rejectionReason);
+                } else {
+                message = String.format("❌ Your booking for \"%s\" has been REJECTED.", resourceName);
+                }
+                break;
+
+        case CANCELLED:
+                notificationType = NotificationType.BOOKING_CANCELLED;
+                message = String.format("⚠️ Your booking for \"%s\" has been CANCELLED.", resourceName);
+                break;
+
+        default:
+                notificationType = NotificationType.BOOKING_CREATED;
+                message = String.format("📋 Your booking for \"%s\" has been submitted and is pending approval.", resourceName);
+                break;
+        }
+        
+        notificationRequest.setType(notificationType);
+        notificationRequest.setMessage(message);
+        
+        notificationService.createNotification(notificationRequest);
+        
         return mapToResponse(saved);
-    }
+        }
 
     public List<BookingResponse> getBookingsByUser(Long userId) {
     return bookingRepository.findBookingsByUserId(userId)

@@ -72,6 +72,56 @@
   animation: fadeInUp 0.4s ease-out;
 }
 
+.admin-staff-card {
+  margin-bottom: 20px;
+  padding: 18px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-staff-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.admin-staff-header p {
+  margin: 6px 0 0;
+  color: var(--text-tertiary);
+  font-size: 0.84rem;
+}
+
+.admin-staff-form {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-staff-form input {
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--border-medium);
+  border-radius: 10px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.admin-staff-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.admin-staff-message {
+  margin: 10px 2px 0;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -447,6 +497,44 @@
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
+.admin-assign-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.74rem;
+  color: var(--text-tertiary);
+}
+
+.admin-busy-staff {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: var(--bg-tertiary);
+}
+
+.admin-busy-title {
+  margin-bottom: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.admin-busy-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+  border-top: 1px dashed var(--border-light);
+  font-size: 0.76rem;
+  color: var(--text-tertiary);
+}
+
+.admin-busy-item:first-of-type {
+  border-top: none;
+}
+
 /* ========== ACTION BUTTONS ========== */
 .admin-action-btn {
   padding: 8px 18px;
@@ -597,6 +685,10 @@
 
 /* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
+  .admin-staff-form {
+    grid-template-columns: 1fr;
+  }
+
   .admin-filters {
     grid-template-columns: 1fr;
     gap: 16px;

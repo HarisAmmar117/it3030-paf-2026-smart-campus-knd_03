@@ -1,5 +1,11 @@
 package com.zenith.webapp.ticket.service.impl;
 
+import com.zenith.webapp.auth.enums.UserRole;
+import com.zenith.webapp.auth.model.User;
+import com.zenith.webapp.auth.repository.UserRepository;
+import com.zenith.webapp.notification.dto.request.CreateNotificationRequest;
+import com.zenith.webapp.notification.enums.NotificationType;
+import com.zenith.webapp.notification.service.NotificationService;
 import com.zenith.webapp.ticket.dto.request.AssignTicketRequest;
 import com.zenith.webapp.ticket.dto.request.CreateCommentRequest;
 import com.zenith.webapp.ticket.dto.request.CreateTicketRequest;
@@ -42,6 +48,8 @@ public class TicketServiceImpl implements TicketService {
     private final TicketRepository ticketRepository;
     private final TicketAttachmentRepository attachmentRepository;
     private final TicketCommentRepository commentRepository;
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Value("${app.ticket.upload-dir:uploads/tickets}")
     private String uploadBaseDir;
@@ -60,13 +68,19 @@ public class TicketServiceImpl implements TicketService {
                 .build();
 
         Ticket saved = ticketRepository.save(ticket);
+
+        if (saved.getPriority() == TicketPriority.HIGH) {
+            notifyAdminsForHighPriorityTicket(saved);
+        }
+
         return toTicketResponse(saved);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<TicketResponse> getTickets(TicketStatus status, TicketPriority priority) {
+    public List<TicketResponse> getTickets(TicketStatus status, TicketPriority priority, Long requesterId) {
         return ticketRepository.findAll().stream()
+                .filter(t -> requesterId == null || t.getRequesterId().equals(requesterId))
                 .filter(t -> status == null || t.getStatus() == status)
                 .filter(t -> priority == null || t.getPriority() == priority)
                 .map(this::toTicketResponse)
@@ -83,22 +97,33 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public TicketResponse updateStatus(Long ticketId, UpdateTicketStatusRequest request, Long actorUserId, String actorRole) {
         Ticket ticket = getTicketOrThrow(ticketId);
+        TicketStatus previousStatus = ticket.getStatus();
 
-        boolean isAdmin = isAdmin(actorRole);
+        boolean isAdminLike = isAdminLike(actorRole);
+        boolean isPrimaryAdmin = isPrimaryAdmin(actorRole);
+        boolean isSupportStaff = isSupportStaff(actorRole);
         boolean isAssignee = ticket.getAssigneeId() != null && ticket.getAssigneeId().equals(actorUserId);
 
-        if (!isAdmin && !isAssignee) {
+        if (!isAdminLike && !isAssignee) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only assignee or admin can update status");
         }
 
-        validateTransition(ticket.getStatus(), request.getStatus(), isAdmin);
+        if (isSupportStaff &&
+                (request.getStatus() == TicketStatus.IN_PROGRESS || request.getStatus() == TicketStatus.RESOLVED)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Support staff cannot change ticket status to IN_PROGRESS or RESOLVED"
+            );
+        }
+
+        validateTransition(ticket.getStatus(), request.getStatus(), isPrimaryAdmin);
 
         if (request.getStatus() == TicketStatus.RESOLVED && isBlank(request.getResolutionNotes())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Resolution notes are required for RESOLVED");
         }
 
         if (request.getStatus() == TicketStatus.REJECTED) {
-            if (!isAdmin) {
+            if (!isPrimaryAdmin) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin can reject ticket");
             }
             if (isBlank(request.getRejectionReason())) {
@@ -114,16 +139,30 @@ public class TicketServiceImpl implements TicketService {
         }
 
         Ticket updated = ticketRepository.save(ticket);
+
+        notifyTicketStatusChanged(updated, previousStatus);
+
         return toTicketResponse(updated);
     }
 
     @Override
     public TicketResponse assignTicket(Long ticketId, AssignTicketRequest request, Long actorUserId, String actorRole) {
-        if (!isAdmin(actorRole)) {
+        if (!isPrimaryAdmin(actorRole)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin can assign ticket");
         }
 
         Ticket ticket = getTicketOrThrow(ticketId);
+
+        User assignee = userRepository.findById(request.getAssigneeId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignee user not found"));
+
+        if (assignee.getRole() != UserRole.SUPPORT_STAFF) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ticket can only be assigned to SUPPORT_STAFF");
+        }
+
+        if (request.getAssigneeId() != null && request.getAssigneeId().equals(actorUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin cannot self-assign a ticket");
+        }
         ticket.setAssigneeId(request.getAssigneeId());
         Ticket updated = ticketRepository.save(ticket);
         return toTicketResponse(updated);
@@ -220,6 +259,9 @@ public class TicketServiceImpl implements TicketService {
                 .build();
 
         TicketComment saved = commentRepository.save(comment);
+
+        notifyNewComment(ticket, saved, actorUserId);
+
         return toCommentResponse(saved);
     }
 
@@ -234,7 +276,7 @@ public class TicketServiceImpl implements TicketService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comment does not belong to ticket");
         }
 
-        boolean canEdit = comment.getAuthorId().equals(actorUserId) || isAdmin(actorRole);
+        boolean canEdit = comment.getAuthorId().equals(actorUserId) || isAdminLike(actorRole);
         if (!canEdit) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only owner or admin can edit comment");
         }
@@ -255,7 +297,7 @@ public class TicketServiceImpl implements TicketService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comment does not belong to ticket");
         }
 
-        boolean canDelete = comment.getAuthorId().equals(actorUserId) || isAdmin(actorRole);
+        boolean canDelete = comment.getAuthorId().equals(actorUserId) || isAdminLike(actorRole);
         if (!canDelete) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only owner or admin can delete comment");
         }
@@ -344,12 +386,79 @@ public class TicketServiceImpl implements TicketService {
                 .build();
     }
 
-    private boolean isAdmin(String role) {
+    private boolean isPrimaryAdmin(String role) {
         return role != null && role.equalsIgnoreCase("ADMIN");
+    }
+
+    private boolean isSupportStaff(String role) {
+        return role != null && role.equalsIgnoreCase("SUPPORT_STAFF");
+    }
+
+    private boolean isAdminLike(String role) {
+        return isPrimaryAdmin(role) || isSupportStaff(role);
     }
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private void notifyTicketStatusChanged(Ticket ticket, TicketStatus previousStatus) {
+        try {
+            CreateNotificationRequest notification = new CreateNotificationRequest();
+            notification.setRecipientId(ticket.getRequesterId());
+            notification.setType(NotificationType.TICKET_STATUS_CHANGED);
+            notification.setReferenceId(ticket.getId());
+            notification.setMessage(
+                    "Ticket #" + ticket.getId() + " status changed from " + previousStatus + " to " + ticket.getStatus() + "."
+            );
+            notificationService.createNotification(notification);
+        } catch (Exception ignored) {
+            // Notification delivery should not block ticket updates.
+        }
+    }
+
+    private void notifyNewComment(Ticket ticket, TicketComment comment, Long actorUserId) {
+        if (ticket.getRequesterId().equals(actorUserId)) {
+            return;
+        }
+
+        try {
+            CreateNotificationRequest notification = new CreateNotificationRequest();
+            notification.setRecipientId(ticket.getRequesterId());
+            notification.setType(NotificationType.NEW_COMMENT);
+            notification.setReferenceId(ticket.getId());
+            notification.setMessage(
+                    "New comment on your ticket #" + ticket.getId() + ": " + shorten(comment.getContent(), 120)
+            );
+            notificationService.createNotification(notification);
+        } catch (Exception ignored) {
+            // Notification delivery should not block comment creation.
+        }
+    }
+
+    private void notifyAdminsForHighPriorityTicket(Ticket ticket) {
+        try {
+            List<User> admins = userRepository.findByRole(UserRole.ADMIN);
+
+            for (User admin : admins) {
+                CreateNotificationRequest notification = new CreateNotificationRequest();
+                notification.setRecipientId(admin.getUser_id());
+                notification.setType(NotificationType.TICKET_STATUS_CHANGED);
+                notification.setReferenceId(ticket.getId());
+                notification.setMessage(
+                        "High priority ticket #" + ticket.getId() + " created: " + ticket.getTitle()
+                );
+                notificationService.createNotification(notification);
+            }
+        } catch (Exception ignored) {
+            // Notification delivery should not block ticket creation.
+        }
+    }
+
+    private String shorten(String text, int max) {
+        if (text == null) return "";
+        if (text.length() <= max) return text;
+        return text.substring(0, max) + "...";
     }
 
 

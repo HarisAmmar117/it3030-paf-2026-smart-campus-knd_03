@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { hasTicketAdminAccess } from "../../utils/authSession";
 import "./TicketLayout.css";
 
 const TICKET_TABS = [
@@ -55,32 +56,25 @@ export default function TicketLayout() {
   }, [isDark]);
 
   const toggleTheme = () => setIsDark(!isDark);
+  const visibleTicketTabs = TICKET_TABS.filter((tab) => {
+    if (hasTicketAdminAccess()) {
+      return tab.to === "/tickets/admin";
+    }
 
+    return tab.to !== "/tickets/admin";
+  });
   return (
     <div className="ticket-layout">
       {/* Global Theme Toggle */}
-      <button onClick={toggleTheme} className="global-theme-toggle" aria-label="Toggle theme">
-        {isDark ? (
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="5" />
-            <line x1="12" y1="1" x2="12" y2="3" />
-            <line x1="12" y1="21" x2="12" y2="23" />
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-            <line x1="1" y1="12" x2="3" y2="12" />
-            <line x1="21" y1="12" x2="23" y2="12" />
-          </svg>
-        ) : (
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-          </svg>
-        )}
-      </button>
+
 
       {/* Header Section */}
       <div className="layout-header">
         <div className="layout-header-content">
           <div className="header-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2z" />
+            </svg>
             <span>Ticket Management</span>
           </div>
           <h1>Support Ticket System</h1>
@@ -91,20 +85,20 @@ export default function TicketLayout() {
       {/* Sub-navigation tabs */}
       <div className="tabs-container">
         <div className="tabs-wrapper">
-          {TICKET_TABS.map((tab) => (
-            <NavLink
-              key={tab.to}
-              to={tab.to}
-              end={tab.end}
-              className={({ isActive }) =>
-                `ticket-tab ${isActive ? "ticket-tab-active" : ""}`
-              }
-            >
-              <span className="tab-icon">{tab.icon()}</span>
-              <span className="tab-label">{tab.label}</span>
-              <span className="tab-indicator"></span>
-            </NavLink>
-          ))}
+         {visibleTicketTabs.map((tab) => (
+          <NavLink
+            key={tab.to}
+            to={tab.to}
+            end={tab.end}
+            className={({ isActive }) =>
+              `ticket-tab ${isActive ? "ticket-tab-active" : ""}`
+            }
+          >
+            <span className="tab-icon">{tab.icon()}</span>
+            <span className="tab-label">{tab.label}</span>
+            <span className="tab-indicator"></span>
+          </NavLink>
+        ))}
         </div>
       </div>
 

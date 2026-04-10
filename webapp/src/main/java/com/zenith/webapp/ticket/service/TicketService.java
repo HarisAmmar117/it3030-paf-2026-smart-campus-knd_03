@@ -19,7 +19,7 @@ public interface TicketService {
 
     TicketResponse createTicket(CreateTicketRequest request, Long requesterId);
 
-    List<TicketResponse> getTickets(TicketStatus status, TicketPriority priority);
+    List<TicketResponse> getTickets(TicketStatus status, TicketPriority priority, Long requesterId);
 
     TicketResponse getTicketById(Long ticketId);
 

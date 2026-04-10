@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createTicket } from "../../api/ticketApi";
+import { getCurrentUserId } from "../../utils/authSession";
 import "./TicketCreateForm.css";
 
 const CATEGORIES = [
@@ -36,6 +37,9 @@ export default function TicketCreateForm() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "preferredContactDetails") {
+      setContactError("");
+    }
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -65,7 +69,12 @@ export default function TicketCreateForm() {
     setSuccess("");
 
     try {
-      const created = await createTicket(form, 101);
+      const currentUserId = getCurrentUserId();
+      if (!currentUserId) {
+        throw new Error("User session not found. Please log in again.");
+      }
+
+      const created = await createTicket(form, currentUserId);
       setSuccess(`Ticket #${created.id} created successfully!`);
       setForm(initialForm);
       setTimeout(() => setSuccess(""), 4000);
@@ -242,8 +251,14 @@ export default function TicketCreateForm() {
             placeholder="e.g. john@campus.edu or +94 77 123 4567"
             value={form.preferredContactDetails}
             onChange={handleChange}
+            className={contactError ? "input-invalid" : ""}
+            aria-invalid={Boolean(contactError)}
+            aria-describedby={contactError ? "contact-error" : undefined}
             required
           />
+          {contactError ? (
+            <p id="contact-error" className="field-error">{contactError}</p>
+          ) : null}
         </div>
 
           {/* Submit */}

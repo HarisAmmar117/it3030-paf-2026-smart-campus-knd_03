@@ -6,6 +6,8 @@ import com.zenith.webapp.notification.dto.response.NotificationResponse;
 import com.zenith.webapp.notification.model.Notification;
 import com.zenith.webapp.notification.repository.NotificationRepository;
 import com.zenith.webapp.notification.service.NotificationService;
+
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -105,6 +107,15 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         notificationRepository.delete(notification);
+    }
+
+    @Override
+    public void deleteNotification(Long id) {
+        if (!notificationRepository.existsById(id)) {
+            throw new EntityNotFoundException("Notification not found with id: " + id);
+        }
+
+        notificationRepository.deleteById(id);
     }
 
     // ── Private helpers ───────────────────────────────────────────────────

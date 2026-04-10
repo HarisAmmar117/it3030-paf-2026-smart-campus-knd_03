@@ -349,7 +349,12 @@ export default function NotificationListPage() {
 
                     <div className="notification-grid">
                         {notifications.map((n) => {
-                            const meta = TYPE_LABELS[n.type] || { label: n.type, color: "badge-closed" };
+                            const isHighTicketAlert =
+                                n.type === "TICKET_STATUS_CHANGED" && /high priority ticket/i.test(n.message || "");
+
+                            const meta = isHighTicketAlert
+                                ? { label: "HIGH TICKET ARRIVED", color: "badge-danger" }
+                                : (TYPE_LABELS[n.type] || { label: n.type, color: "badge-closed" });
                             return (
                                 <article className={`notification-card-item ${!n.read ? "unread" : ""}`} key={n.id}>
                                     <div className="notification-card-header">

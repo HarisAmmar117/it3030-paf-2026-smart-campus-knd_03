@@ -68,9 +68,16 @@ export async function markAllAsRead(userId) {
     if (!response.ok) throw new Error("Failed to mark all as read");
 }
 
-// DELETE
-export async function deleteNotification(notificationId, userId) {
+// DELETE by Admin
+export async function deleteNotification(notificationId) {
     const response = await fetch(`${BASE_URL}/api/notifications/${notificationId}`, {
+        method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Failed to delete notification");
+}
+// Delete by User
+export async function deleteNotificationByUser(notificationId, userId) {
+    const response = await fetch(`${BASE_URL}/api/notifications/my/${notificationId}`, {
         method: "DELETE",
         headers: { "X-User-Id": String(userId) },
     });
