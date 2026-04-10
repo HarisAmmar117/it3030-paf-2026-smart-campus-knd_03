@@ -58,33 +58,34 @@ public class ResourceController {
     @GetMapping
     public ResponseEntity<List<ResourceResponseDTO>> getAllResources(
             @RequestParam(required = false) Type type) {
-        
+
         List<Resource> resources;
         if (type != null) {
             resources = service.getResourcesByType(type);
         } else {
             resources = service.getAllResources();
         }
-        
+
         List<ResourceResponseDTO> responseList = resources.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
-                
+
         return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ResourceResponseDTO> getResourceById(@PathVariable Long id) {
         Optional<Resource> resource = service.getResourceById(id);
-        
+
         return resource.map(value -> new ResponseEntity<>(convertToResponseDTO(value), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResourceResponseDTO> updateResource(@PathVariable Long id, @RequestBody ResourceRequestDTO requestDTO) {
+    public ResponseEntity<ResourceResponseDTO> updateResource(@PathVariable Long id,
+            @RequestBody ResourceRequestDTO requestDTO) {
         Optional<Resource> existingResource = service.getResourceById(id);
-        
+
         if (existingResource.isPresent()) {
             Resource resourceToUpdate = existingResource.get();
             resourceToUpdate.setName(requestDTO.getName());
@@ -94,7 +95,7 @@ public class ResourceController {
             resourceToUpdate.setLocation(requestDTO.getLocation());
             resourceToUpdate.setAvailabilityWindow(requestDTO.getAvailabilityWindow());
             resourceToUpdate.setStatus(requestDTO.getStatus());
-            
+
             Resource updatedResource = service.saveResource(resourceToUpdate);
             return new ResponseEntity<>(convertToResponseDTO(updatedResource), HttpStatus.OK);
         } else {
