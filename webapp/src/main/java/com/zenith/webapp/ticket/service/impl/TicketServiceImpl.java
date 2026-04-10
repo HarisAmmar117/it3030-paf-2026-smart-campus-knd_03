@@ -100,21 +100,16 @@ public class TicketServiceImpl implements TicketService {
         Ticket ticket = getTicketOrThrow(ticketId);
         TicketStatus previousStatus = ticket.getStatus();
 
-        boolean isAdminLike = isAdminLike(actorRole);
         boolean isPrimaryAdmin = isPrimaryAdmin(actorRole);
         boolean isSupportStaff = isSupportStaff(actorRole);
         boolean isAssignee = ticket.getAssigneeId() != null && ticket.getAssigneeId().equals(actorUserId);
 
-        if (!isAdminLike && !isAssignee) {
+        if (!isPrimaryAdmin && !isSupportStaff && !isAssignee) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only assignee or admin can update status");
         }
 
-        if (isSupportStaff &&
-                (request.getStatus() == TicketStatus.IN_PROGRESS || request.getStatus() == TicketStatus.RESOLVED)) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Support staff cannot change ticket status to IN_PROGRESS or RESOLVED"
-            );
+        if (isSupportStaff && !isAssignee) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Support staff can update status only for assigned tickets");
         }
 
         validateTransition(ticket.getStatus(), request.getStatus(), isPrimaryAdmin);

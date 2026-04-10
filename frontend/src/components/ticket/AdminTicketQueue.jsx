@@ -69,7 +69,7 @@ export default function AdminTicketQueue() {
 
   const canPickStatus = (status) => {
     if (actorRole !== "SUPPORT_STAFF") return true;
-    return status !== "IN_PROGRESS" && status !== "RESOLVED";
+    return status !== "REJECTED";
   };
 
   const loadTickets = useCallback(async () => {
@@ -321,6 +321,11 @@ export default function AdminTicketQueue() {
           const isLoading = actionLoading[t.id];
           const currentAction = statusActions[t.id];
           const isAssignLocked = t.status === "RESOLVED" || t.status === "CLOSED";
+          const isSupportAssignee =
+            actorRole === "SUPPORT_STAFF" &&
+            t.assigneeId != null &&
+            Number(t.assigneeId) === Number(actorUserId);
+          const canUpdateStatusSection = actorRole !== "SUPPORT_STAFF" || isSupportAssignee;
 
           return (
             <article className={`admin-ticket ${isExpanded ? "admin-ticket-expanded" : ""}`} key={t.id}>
@@ -439,7 +444,7 @@ export default function AdminTicketQueue() {
                   )}
 
                   {/* ====== STATUS SECTION ====== */}
-                  {transitions.length > 0 && (
+                  {transitions.length > 0 && canUpdateStatusSection && (
                     <div className="admin-action-section">
                       <h4>📋 Update Status</h4>
                       <div className="admin-status-btns">
@@ -508,6 +513,15 @@ export default function AdminTicketQueue() {
                           </button>
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {actorRole === "SUPPORT_STAFF" && !isSupportAssignee && transitions.length > 0 && (
+                    <div className="admin-action-section">
+                      <h4>📋 Update Status</h4>
+                      <small className="admin-assign-hint">
+                        Status update is available only when this ticket is assigned to you.
+                      </small>
                     </div>
                   )}
 
