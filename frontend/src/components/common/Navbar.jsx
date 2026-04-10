@@ -2,9 +2,9 @@ import { NavLink } from "react-router-dom";
 import { useState, useEffect, useRef, useCallback } from "react";
 import "./Navbar.css";
 import logo from "../../../public/zenith-logo.png";
-import { 
-  getCurrentRole, 
-  isAdminOrSupport, 
+import {
+  getCurrentRole,
+  isAdminOrSupport,
   isUserRole,
   getCurrentUserId
 } from "../../utils/authSession";
@@ -12,18 +12,18 @@ import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from "../
 
 // Core management links (shown to all logged-in users)
 const MANAGEMENT_LINKS = [
-  { 
-    to: "/tickets", 
-    label: "Tickets", 
+  {
+    to: "/tickets",
+    label: "Tickets",
     icon: () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
         <path d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2z" />
       </svg>
     )
   },
-  { 
-    to: "/facilities", 
-    label: "Facilities", 
+  {
+    to: "/facilities",
+    label: "Facilities",
     icon: () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
         <rect x="4" y="10" width="6" height="11" rx="1" />
@@ -32,23 +32,13 @@ const MANAGEMENT_LINKS = [
       </svg>
     )
   },
-  { 
-    to: "/notifications", 
-    label: "Notifications", 
-    icon: () => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-      </svg>
-    )
-  },
 ];
 
 // Public links (Home & About) - shown to non-authenticated users AND regular users
 const PUBLIC_LINKS = [
-  { 
-    to: "/", 
-    label: "Home", 
+  {
+    to: "/",
+    label: "Home",
     icon: () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -57,9 +47,9 @@ const PUBLIC_LINKS = [
     ),
     end: true
   },
-  { 
-    to: "/about", 
-    label: "About", 
+  {
+    to: "/about",
+    label: "About",
     icon: () => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
         <circle cx="12" cy="12" r="10" />
@@ -77,9 +67,9 @@ const getBookingLinks = () => {
   if (isAdminOrSupportUser) {
     // Admin/Support sees: All Bookings
     return [
-      { 
-        to: "/bookings", 
-        label: "All Bookings", 
+      {
+        to: "/bookings",
+        label: "All Bookings",
         icon: () => (
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -94,9 +84,9 @@ const getBookingLinks = () => {
   } else if (isRegularUser) {
     // Regular user sees: My Bookings + Create Booking
     return [
-      { 
-        to: "/bookings/my-bookings", 
-        label: "My Bookings", 
+      {
+        to: "/bookings/my-bookings",
+        label: "My Bookings",
         icon: () => (
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -109,9 +99,23 @@ const getBookingLinks = () => {
       }
     ];
   }
-  
+
   return [];
 };
+
+// Admin-only Notification nav link (routes to NotificationListPage)
+const ADMIN_NOTIFICATION_LINK = [
+  {
+    to: "/notifications",
+    label: "Notification",
+    icon: () => (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg>
+    )
+  }
+];
 
 // Get navbar links based on authentication status and role
 const getNavLinks = (isLoggedIn) => {
@@ -119,16 +123,16 @@ const getNavLinks = (isLoggedIn) => {
     // Non-authenticated users: Home + About only
     return PUBLIC_LINKS;
   }
-  
+
   const isRegularUser = isUserRole();
   const bookingLinks = getBookingLinks();
-  
+
   if (isRegularUser) {
-    // Regular users: Home + About + Management Links + Booking Links
+    // Regular users: Home + About + Management Links + Booking Links (NO Notification link — they use the bell)
     return [...PUBLIC_LINKS, ...MANAGEMENT_LINKS, ...bookingLinks];
   } else {
-    // Admin/Support users: Management Links + Booking Links (NO Home/About)
-    return [...MANAGEMENT_LINKS, ...bookingLinks];
+    // Admin/Support users: Management Links + Booking Links + Notification link
+    return [...MANAGEMENT_LINKS, ...bookingLinks, ...ADMIN_NOTIFICATION_LINK];
   }
 };
 
@@ -136,7 +140,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(() => {
-    return localStorage.getItem("theme") === "dark" || 
+    return localStorage.getItem("theme") === "dark" ||
       (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
   });
 
@@ -333,8 +337,8 @@ export default function Navbar() {
               )}
             </button>
 
-            {/* Notification Bell */}
-            {isLoggedIn && (
+            {/* Notification Bell — shown only to regular Users (Admins use the nav link) */}
+            {isLoggedIn && isUserRole() && (
               <div className="notification-wrapper" ref={notificationRef}>
                 <button onClick={toggleNotification} className="notification-btn" aria-label="Notifications">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
@@ -383,7 +387,8 @@ export default function Navbar() {
                       )}
                     </div>
                     <div className="notification-footer">
-                      <NavLink to="/notifications" onClick={() => setIsNotificationOpen(false)}>
+                      {/* Routes regular Users to their dedicated UserNotificationPage */}
+                      <NavLink to="/user-notifications" onClick={() => setIsNotificationOpen(false)}>
                         View all notifications
                       </NavLink>
                     </div>
@@ -425,8 +430,8 @@ export default function Navbar() {
             )}
 
             {/* Mobile Menu Button */}
-            <button 
-              className={`mobile-menu-btn ${isMobileMenuOpen ? "active" : ""}`} 
+            <button
+              className={`mobile-menu-btn ${isMobileMenuOpen ? "active" : ""}`}
               onClick={toggleMobileMenu}
               aria-label="Menu"
             >
