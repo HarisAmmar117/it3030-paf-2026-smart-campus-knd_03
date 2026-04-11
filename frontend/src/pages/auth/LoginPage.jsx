@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./LoginPage.css";
+import logo from "/zenith-logo.png"; // Add this import
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -58,10 +59,9 @@ export default function LoginPage() {
     }
   };
 
-const handleGoogleLogin = () => {
-  window.location.href =
-    "http://localhost:8081/oauth2/authorization/google";
-};
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:8081/oauth2/authorization/google";
+  };
 
   return (
     <div className="login-container">
@@ -85,13 +85,10 @@ const handleGoogleLogin = () => {
       </button>
 
       <div className="login-card">
-        {/* Header */}
+        {/* Header with Logo */}
         <div className="login-header">
-          <div className="login-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
+          <div className="login-logo">
+            <img src={logo} alt="Zenith Logo" className="login-logo-img" />
           </div>
           <div className="login-header-text">
             <h1>Welcome Back</h1>

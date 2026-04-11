@@ -136,6 +136,18 @@ const getNavLinks = (isLoggedIn) => {
   }
 };
 
+// Helper function to get role display name
+const getRoleDisplayName = (role) => {
+  switch (role) {
+    case "ADMIN":
+      return "Admin";
+    case "SUPPORT_STAFF":
+      return "Support";
+    default:
+      return "";
+  }
+};
+
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -280,6 +292,8 @@ export default function Navbar() {
   };
 
   const visibleLinks = MODULE_LINKS;
+  const roleDisplayName = getRoleDisplayName(role);
+  const displayName = roleDisplayName ? `${userName} (${roleDisplayName})` : userName;
 
   return (
     <>
@@ -387,7 +401,6 @@ export default function Navbar() {
                       )}
                     </div>
                     <div className="notification-footer">
-                      {/* Routes regular Users to their dedicated UserNotificationPage */}
                       <NavLink to="/user-notifications" onClick={() => setIsNotificationOpen(false)}>
                         View all notifications
                       </NavLink>
@@ -397,14 +410,14 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* User Name Chip */}
+            {/* User Name Chip with Role */}
             {isLoggedIn && (
-              <div className="user-name-chip" title={userEmail || role}>
+              <div className="user-name-chip" title={`${userEmail} | Role: ${role}`}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
-                <span>{userName}</span>
+                <span>{displayName}</span>
               </div>
             )}
 
@@ -485,7 +498,7 @@ export default function Navbar() {
                 </svg>
               </div>
               <div>
-                <div className="mobile-user-name">{isLoggedIn ? userName : "Guest"}</div>
+                <div className="mobile-user-name">{isLoggedIn ? displayName : "Guest"}</div>
                 <div className="mobile-user-email">
                   {isLoggedIn ? userEmail || role : "Not signed in"}
                 </div>

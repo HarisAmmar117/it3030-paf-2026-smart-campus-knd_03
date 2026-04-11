@@ -1,12 +1,51 @@
+/* ========== CSS VARIABLES ========== */
+:root {
+  --bg-primary: #fefaf5;
+  --bg-secondary: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #595959;
+  --text-tertiary: #8c8c8c;
+  --border-light: #e8e2d9;
+  --border-medium: #d9d0c4;
+  --accent: #e67e22;
+  --accent-hover: #d35400;
+  --accent-light: #fdf2e9;
+  --accent-border: #f5d5b8;
+  --accent-glow: rgba(230, 126, 34, 0.1);
+  --danger: #ef4444;
+  --danger-bg: #fef2f2;
+  --shadow-lg: 0 10px 40px -12px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0d0d0d;
+  --bg-secondary: #1a1a1a;
+  --text-primary: #e5e5e5;
+  --text-secondary: #a3a3a3;
+  --text-tertiary: #737373;
+  --border-light: #2a2a2a;
+  --border-medium: #3a3a3a;
+  --accent: #f39c12;
+  --accent-hover: #e67e22;
+  --accent-light: #2a2418;
+  --accent-border: #3a2e1e;
+  --accent-glow: rgba(243, 156, 18, 0.15);
+  --danger: #f87171;
+  --danger-bg: #7f1d1d;
+  --shadow-lg: 0 10px 40px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* ========== OAUTH CONTAINER ========== */
 .oauth-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
   padding: 24px;
+  background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
 }
 
+/* ========== OAUTH CARD ========== */
 .oauth-card {
   text-align: center;
   background: var(--bg-secondary);
@@ -16,50 +55,111 @@
   max-width: 400px;
   width: 100%;
   box-shadow: var(--shadow-lg);
-  animation: fadeIn 0.3s ease;
+  animation: fadeInUp 0.4s ease-out;
 }
 
 .oauth-card.error {
   border-left: 4px solid var(--danger);
 }
 
+/* ========== ICON ========== */
+.oauth-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  background: var(--accent-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+
+.oauth-icon svg {
+  stroke: currentColor;
+}
+
+.oauth-icon.error-icon {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* ========== SPINNER ========== */
+.spinner {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 24px;
+  border: 3px solid var(--border-light);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========== TYPOGRAPHY ========== */
 .oauth-card h2 {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
-  margin: 16px 0 8px;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
 }
 
 .oauth-card p {
   color: var(--text-secondary);
   font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .oauth-card.error h2 {
   color: var(--danger);
 }
 
-.spinner-large {
-  width: 48px;
-  height: 48px;
-  border: 3px solid var(--border-medium);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 24px;
+.redirect-message {
+  margin-top: 16px;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes fadeIn {
+/* ========== ANIMATIONS ========== */
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 640px) {
+  .oauth-card {
+    padding: 32px 24px;
+  }
+
+  .oauth-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .oauth-icon svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+  }
+
+  .oauth-card h2 {
+    font-size: 1.3rem;
   }
 }
