@@ -305,7 +305,7 @@ export default function Navbar() {
               <img src={logo} alt="Zenith Logo" className="brand-logo-img" />
             </div>
             <div className="brand-text">
-              <span className="brand-title">Zenith</span>
+              <span className="brand-title">ZENITH</span>
               <span className="brand-subtitle">Smart Campus Operations</span>
             </div>
           </NavLink>
